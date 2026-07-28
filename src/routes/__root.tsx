@@ -77,20 +77,24 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Study DZ — منصة تعليمية سحابية جزائرية" },
+      { title: "Study DZ — منصة سحابية جزائرية لإدارة التعليم" },
       {
         name: "description",
         content:
-          "منصة سحابية جزائرية لإدارة المؤسسات التعليمية: دروس، اختبارات، نتائج ولوحات تحكم للمدير والأستاذ والطالب.",
+          "حوّل مؤسستك إلى مؤسسة تعليمية رقمية متكاملة: لوحات تحكم للمدير والأستاذ والطالب، دروس واختبارات ونتائج، باشتراك سنوي 7,000 دج.",
       },
       { name: "author", content: "Study DZ" },
-      { property: "og:title", content: "Study DZ — منصة تعليمية سحابية جزائرية" },
+      { property: "og:title", content: "Study DZ — منصة سحابية جزائرية لإدارة التعليم" },
       {
         property: "og:description",
-        content: "حوّل مؤسستك إلى مؤسسة تعليمية رقمية متكاملة مع Study DZ.",
+        content: "حوّل مؤسستك إلى مؤسسة تعليمية رقمية متكاملة: لوحات تحكم للمدير والأستاذ والطالب، دروس واختبارات ونتائج، باشتراك سنوي 7,000 دج.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Study DZ — منصة سحابية جزائرية لإدارة التعليم" },
+      { name: "twitter:description", content: "حوّل مؤسستك إلى مؤسسة تعليمية رقمية متكاملة: لوحات تحكم للمدير والأستاذ والطالب، دروس واختبارات ونتائج، باشتراك سنوي 7,000 دج." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5ececb8f-022c-4aef-bae6-72f5bfa4a329/id-preview-c4a12f50--61704c04-869c-4a94-8a4c-9499fed312d8.lovable.app-1785243113839.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5ececb8f-022c-4aef-bae6-72f5bfa4a329/id-preview-c4a12f50--61704c04-869c-4a94-8a4c-9499fed312d8.lovable.app-1785243113839.png" },
     ],
     links: [
       {
@@ -103,7 +107,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@300;400;500;700;800&display=swap",
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),
   shellComponent: RootShell,
