@@ -9,11 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SubscribeRouteImport } from './routes/subscribe'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as FeaturesRouteImport } from './routes/features'
 import { Route as IndexRouteImport } from './routes/index'
 
+const SubscribeRoute = SubscribeRouteImport.update({
+  id: '/subscribe',
+  path: '/subscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -40,12 +46,14 @@ export interface FileRoutesByFullPath {
   '/features': typeof FeaturesRoute
   '/pricing': typeof PricingRoute
   '/register': typeof RegisterRoute
+  '/subscribe': typeof SubscribeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/features': typeof FeaturesRoute
   '/pricing': typeof PricingRoute
   '/register': typeof RegisterRoute
+  '/subscribe': typeof SubscribeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,14 @@ export interface FileRoutesById {
   '/features': typeof FeaturesRoute
   '/pricing': typeof PricingRoute
   '/register': typeof RegisterRoute
+  '/subscribe': typeof SubscribeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/features' | '/pricing' | '/register'
+  fullPaths: '/' | '/features' | '/pricing' | '/register' | '/subscribe'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/features' | '/pricing' | '/register'
-  id: '__root__' | '/' | '/features' | '/pricing' | '/register'
+  to: '/' | '/features' | '/pricing' | '/register' | '/subscribe'
+  id: '__root__' | '/' | '/features' | '/pricing' | '/register' | '/subscribe'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,10 +76,18 @@ export interface RootRouteChildren {
   FeaturesRoute: typeof FeaturesRoute
   PricingRoute: typeof PricingRoute
   RegisterRoute: typeof RegisterRoute
+  SubscribeRoute: typeof SubscribeRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/subscribe': {
+      id: '/subscribe'
+      path: '/subscribe'
+      fullPath: '/subscribe'
+      preLoaderRoute: typeof SubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/register': {
       id: '/register'
       path: '/register'
@@ -107,6 +124,7 @@ const rootRouteChildren: RootRouteChildren = {
   FeaturesRoute: FeaturesRoute,
   PricingRoute: PricingRoute,
   RegisterRoute: RegisterRoute,
+  SubscribeRoute: SubscribeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
