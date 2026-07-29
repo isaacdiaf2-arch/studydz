@@ -386,7 +386,7 @@ function TeacherDashboard() {
         <div className="space-y-2">
           {(attempts.data ?? []).length === 0 && <EmptyState text="لا توجد نتائج بعد." />}
           {(attempts.data ?? []).map((a) => {
-            const student = a.profiles as { first_name: string; last_name: string } | null;
+            const student = a.profiles as unknown as { first_name: string; last_name: string } | null;
             return (
               <div key={a.id} className="card-soft flex flex-wrap items-center gap-2 p-3 text-sm">
                 <span className="font-semibold">
