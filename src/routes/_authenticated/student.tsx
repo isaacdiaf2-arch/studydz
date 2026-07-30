@@ -1,12 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { BarChart3, BookOpen, ClipboardList, FileText, Megaphone, Table2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { DashboardShell, StatCard, EmptyState } from "@/components/dashboard/DashboardShell";
 import { useAccount } from "@/lib/account";
+import { getExamForStudent, submitExam } from "@/lib/exam.functions";
+
 
 export const Route = createFileRoute("/_authenticated/student")({
   component: StudentDashboard,
@@ -97,8 +100,7 @@ function StudentDashboard() {
     return (
       <ExamRunner
         examId={activeExam}
-        institutionId={institutionId!}
-        studentId={userId!}
+
         onDone={() => {
           setActiveExam(null);
           queryClient.invalidateQueries({ queryKey: ["student"] });
@@ -238,86 +240,36 @@ function StudentDashboard() {
 
 function ExamRunner({
   examId,
-  institutionId,
-  studentId,
   onDone,
 }: {
   examId: string;
-  institutionId: string;
-  studentId: string;
   onDone: () => void;
 }) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
+  const loadExam = useServerFn(getExamForStudent);
+  const sendSubmit = useServerFn(submitExam);
 
   const exam = useQuery({
-    queryKey: ["exam", examId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("exams")
-        .select("*, questions(id, text, points, order_index, options(id, text, order_index))")
-        .eq("id", examId)
-        .single();
-      if (error) throw error;
-      return data;
-    },
+    queryKey: ["student", "exam", examId],
+    queryFn: () => loadExam({ data: { examId } }),
   });
 
-  const questions = ((exam.data?.questions ?? []) as {
-    id: string;
-    text: string;
-    points: number;
-    order_index: number;
-    options: { id: string; text: string; order_index: number }[];
-  }[]).sort((a, b) => a.order_index - b.order_index);
+  const questions = exam.data?.questions ?? [];
 
   async function submit() {
     setBusy(true);
-    const { data: attempt, error } = await supabase
-      .from("attempts")
-      .insert({ institution_id: institutionId, exam_id: examId, student_id: studentId })
-      .select("id")
-      .single();
-    if (error || !attempt) {
+    try {
+      const result = await sendSubmit({ data: { examId, answers } });
+      toast.success(`تم تسليم الاختبار — نتيجتك ${result.score}/${result.maxScore}`);
+      onDone();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "تعذر تسليم الاختبار.");
+    } finally {
       setBusy(false);
-      toast.error(error?.message ?? "خطأ");
-      return;
     }
-
-    const { data: correctRows } = await supabase
-      .from("options")
-      .select("id, question_id")
-      .eq("is_correct", true)
-      .in("question_id", questions.map((q) => q.id));
-
-    let score = 0;
-    let maxScore = 0;
-    const rows = questions.map((q) => {
-      maxScore += Number(q.points);
-      const chosen = answers[q.id] ?? null;
-      const correct = correctRows?.find((c) => c.question_id === q.id)?.id;
-      const isCorrect = !!chosen && chosen === correct;
-      if (isCorrect) score += Number(q.points);
-      return {
-        institution_id: institutionId,
-        attempt_id: attempt.id,
-        question_id: q.id,
-        option_id: chosen,
-        is_correct: isCorrect,
-        awarded: isCorrect ? Number(q.points) : 0,
-      };
-    });
-
-    await supabase.from("attempt_answers").insert(rows);
-    await supabase
-      .from("attempts")
-      .update({ submitted_at: new Date().toISOString(), score, max_score: maxScore })
-      .eq("id", attempt.id);
-
-    setBusy(false);
-    toast.success(`تم تسليم الاختبار — نتيجتك ${score}/${maxScore}`);
-    onDone();
   }
+
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
