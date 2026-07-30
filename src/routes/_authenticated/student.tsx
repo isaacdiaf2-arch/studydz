@@ -97,8 +97,7 @@ function StudentDashboard() {
     return (
       <ExamRunner
         examId={activeExam}
-        institutionId={institutionId!}
-        studentId={userId!}
+
         onDone={() => {
           setActiveExam(null);
           queryClient.invalidateQueries({ queryKey: ["student"] });
