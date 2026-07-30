@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Mail, Send, CheckCircle2 } from "lucide-react";
+import { Mail, Phone, Send, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -51,9 +51,11 @@ function Contact() {
     ].join("\n");
 
     const subject = `طلب تواصل من ${get("institution") || "مؤسسة"} — Study DZ`;
-    window.open(`${GMAIL_COMPOSE}&su=${encodeURIComponent(
-      subject,
-    )}&body=${encodeURIComponent(body)}`;
+    window.open(
+      `${GMAIL_COMPOSE}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
+      "_blank",
+      "noopener",
+    );
     setSent(true);
   }
 
