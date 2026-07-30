@@ -2,16 +2,12 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-/** Secret unlock code for the hidden platform-admin entry (triple click on the brand name). */
-function unlockCode() {
-  return process.env.PLATFORM_UNLOCK_CODE ?? "getup";
-}
-
 export const unlockPlatformAdmin = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => z.object({ code: z.string().min(1).max(64) }).parse(data))
   .handler(async ({ data, context }) => {
-    if (data.code.trim() !== unlockCode()) throw new Error("كلمة المرور غير صحيحة.");
+    const expected = process.env.PLATFORM_UNLOCK_CODE ?? "getup";
+    if (data.code.trim() !== expected) throw new Error("كلمة المرور غير صحيحة.");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("user_roles")
@@ -71,15 +67,17 @@ export const requestPasswordReset = createServerFn({ method: "POST" })
     return { ok: true as const, target };
   });
 
-const resolveSchema = z.object({
-  requestId: z.string().uuid(),
-  action: z.enum(["set_password", "temp_code", "reject"]),
-  newPassword: z.string().min(8).max(72).optional(),
-});
-
 export const resolvePasswordReset = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) => resolveSchema.parse(data))
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        requestId: z.string().uuid(),
+        action: z.enum(["set_password", "temp_code", "reject"]),
+        newPassword: z.string().min(8).max(72).optional(),
+      })
+      .parse(data),
+  )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
