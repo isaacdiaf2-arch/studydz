@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Mail, Send, CheckCircle2 } from "lucide-react";
+import { Mail, Phone, Send, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 
-const SUPPORT_EMAIL = "isaacdiaf2@gmail.com";
+import { SUPPORT_EMAIL, SUPPORT_PHONE, GMAIL_COMPOSE, WHATSAPP_LINK } from "@/components/site/SiteFooter";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -51,9 +51,11 @@ function Contact() {
     ].join("\n");
 
     const subject = `طلب تواصل من ${get("institution") || "مؤسسة"} — Study DZ`;
-    window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
-      subject,
-    )}&body=${encodeURIComponent(body)}`;
+    window.open(
+      `${GMAIL_COMPOSE}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
+      "_blank",
+      "noopener",
+    );
     setSent(true);
   }
 
@@ -76,7 +78,7 @@ function Contact() {
             <h2 className="mt-4 text-2xl">تم تجهيز رسالتك</h2>
             <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-muted-foreground">
               إن لم يفتح برنامج البريد تلقائيًا، يمكنك مراسلتنا مباشرة على{" "}
-              <a className="font-semibold text-primary" href={`mailto:${SUPPORT_EMAIL}`} dir="ltr">
+              <a className="font-semibold text-primary" href={GMAIL_COMPOSE} target="_blank" rel="noreferrer" dir="ltr">
                 {SUPPORT_EMAIL}
               </a>
               .
@@ -112,11 +114,20 @@ function Contact() {
           </form>
         )}
 
-        <div className="card-soft mt-8 flex items-center gap-3 p-5 text-sm">
+        <div className="card-soft mt-8 flex flex-wrap items-center gap-4 p-5 text-sm">
+          <a
+            className="flex items-center gap-2 font-semibold text-foreground"
+            href={WHATSAPP_LINK}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Phone className="h-5 w-5 shrink-0 text-primary" />
+            <span dir="ltr">{SUPPORT_PHONE}</span>
+          </a>
           <Mail className="h-5 w-5 shrink-0 text-primary" />
           <span className="text-muted-foreground">
             للدعم المباشر:{" "}
-            <a className="font-semibold text-foreground" href={`mailto:${SUPPORT_EMAIL}`} dir="ltr">
+            <a className="font-semibold text-foreground" href={GMAIL_COMPOSE} target="_blank" rel="noreferrer" dir="ltr">
               {SUPPORT_EMAIL}
             </a>
           </span>

@@ -14,12 +14,17 @@ import {
   XCircle,
   PauseCircle,
   Banknote,
+  KeyRound,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { DashboardShell, StatCard, EmptyState } from "@/components/dashboard/DashboardShell";
 import { reviewPayment, setInstitutionStatus } from "@/lib/platform.functions";
+import { signContractAsPlatform, setContractStatus } from "@/lib/contracts.functions";
+import { CONTRACT_STATUS_LABEL, type ContractStatus } from "@/lib/contracts.shared";
+import { resolvePasswordReset } from "@/lib/auth.functions";
+import { SignatureSheet } from "@/components/dashboard/SignatureSheet";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminDashboard,
@@ -31,6 +36,7 @@ const nav = [
   { key: "payments", label: "المدفوعات", icon: CreditCard },
   { key: "contracts", label: "العقود", icon: FileSignature },
   { key: "users", label: "المستخدمون", icon: Users },
+  { key: "resets", label: "طلبات كلمة المرور", icon: KeyRound },
   { key: "support", label: "الدعم", icon: LifeBuoy },
 ];
 
@@ -112,6 +118,59 @@ function AdminDashboard() {
       if (error) throw error;
       return data;
     },
+  });
+
+  const resets = useQuery({
+    queryKey: ["admin", "resets"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("password_reset_requests")
+        .select("*")
+        .eq("target", "platform_admin")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const signPlatformFn = useServerFn(signContractAsPlatform);
+  const contractStatusFn = useServerFn(setContractStatus);
+  const resolveResetFn = useServerFn(resolvePasswordReset);
+  const [signingContract, setSigningContract] = useState<string | null>(null);
+
+  const signContract = useMutation({
+    mutationFn: (vars: { contractId: string; signature: string }) => signPlatformFn({ data: vars }),
+    onSuccess: () => {
+      toast.success("تم اعتماد العقد وتفعيل الاشتراك.");
+      setSigningContract(null);
+      queryClient.invalidateQueries({ queryKey: ["admin"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const changeContract = useMutation({
+    mutationFn: (vars: { contractId: string; status: ContractStatus; note?: string }) =>
+      contractStatusFn({ data: vars }),
+    onSuccess: () => {
+      toast.success("تم تحديث حالة العقد.");
+      queryClient.invalidateQueries({ queryKey: ["admin"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const resolveReset = useMutation({
+    mutationFn: (vars: {
+      requestId: string;
+      action: "set_password" | "temp_code" | "reject";
+      newPassword?: string;
+    }) => resolveResetFn({ data: vars }),
+    onSuccess: (res) => {
+      toast.success(res.tempCode ? `الرمز المؤقت: ${res.tempCode}` : "تمت معالجة الطلب.", {
+        duration: 12000,
+      });
+      queryClient.invalidateQueries({ queryKey: ["admin", "resets"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const reviewFn = useServerFn(reviewPayment);
@@ -316,14 +375,118 @@ function AdminDashboard() {
           {(contracts.data ?? []).length === 0 && <EmptyState text="لا توجد عقود بعد." />}
           {(contracts.data ?? []).map((c) => (
             <div key={c.id} className="card-soft p-4">
-              <p className="font-semibold">
-                {(c.institutions as { name: string } | null)?.name ?? "مؤسسة"}
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+                <div className="min-w-0">
+                  <p className="truncate font-semibold">
+                    {(c.institutions as { name: string } | null)?.name ?? "مؤسسة"}
+                  </p>
+                  <p className="text-xs text-muted-foreground" dir="ltr">
+                    {c.contract_number ?? "—"}
+                  </p>
+                </div>
+                <span className="shrink-0 rounded-md bg-secondary px-2 py-1 text-xs">
+                  {CONTRACT_STATUS_LABEL[(c.status ?? "created") as ContractStatus]}
+                </span>
+              </div>
+              <p className="mt-2 whitespace-pre-line text-sm leading-7 text-muted-foreground">
+                {c.body}
               </p>
-              <p className="mt-2 text-sm leading-7 text-muted-foreground">{c.body}</p>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <SignatureBox title="إمضاء مدير المؤسسة" value={c.institution_signature} />
                 <SignatureBox title="إمضاء مدير المنصة" value={c.platform_signature} />
               </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {c.status === "awaiting_platform" && (
+                  <Button size="sm" onClick={() => setSigningContract(c.id)}>
+                    <FileSignature className="ms-1 h-4 w-4" /> إمضاء واعتماد العقد
+                  </Button>
+                )}
+                {c.status !== "cancelled" && c.status !== "approved" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() =>
+                      changeContract.mutate({ contractId: c.id, status: "cancelled" })
+                    }
+                  >
+                    <XCircle className="ms-1 h-4 w-4" /> إلغاء العقد
+                  </Button>
+                )}
+                {c.status === "approved" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => changeContract.mutate({ contractId: c.id, status: "renewed" })}
+                  >
+                    تجديد العقد
+                  </Button>
+                )}
+              </div>
+            </div>
+          ))}
+          {signingContract && (
+            <SignatureSheet
+              open
+              title="إمضاء مدير المنصة"
+              onClose={() => setSigningContract(null)}
+              onConfirm={(signature: string) =>
+                signContract.mutate({ contractId: signingContract, signature })
+              }
+            />
+          )}
+        </div>
+      )}
+
+      {tab === "resets" && (
+        <div className="space-y-3">
+          {(resets.data ?? []).length === 0 && (
+            <EmptyState text="لا توجد طلبات إعادة تعيين كلمة المرور." />
+          )}
+          {(resets.data ?? []).map((r) => (
+            <div key={r.id} className="card-soft p-4 text-sm">
+              <p className="font-semibold">{r.full_name}</p>
+              <p className="text-xs text-muted-foreground" dir="ltr">
+                {r.email}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                الحالة: {r.status === "pending" ? "🟡 معلّق" : r.status === "resolved" ? "🟢 تمت المعالجة" : "🔴 مرفوض"}
+                {r.temp_code ? ` · الرمز المؤقت: ${r.temp_code}` : ""}
+              </p>
+              {r.status === "pending" && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() =>
+                      resolveReset.mutate({ requestId: r.id, action: "temp_code" })
+                    }
+                  >
+                    إصدار رمز مؤقت
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      const pwd = window.prompt("كلمة المرور الجديدة (8 أحرف فأكثر)");
+                      if (pwd) {
+                        resolveReset.mutate({
+                          requestId: r.id,
+                          action: "set_password",
+                          newPassword: pwd,
+                        });
+                      }
+                    }}
+                  >
+                    تعيين كلمة مرور
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => resolveReset.mutate({ requestId: r.id, action: "reject" })}
+                  >
+                    رفض
+                  </Button>
+                </div>
+              )}
             </div>
           ))}
         </div>

@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Menu, X, GraduationCap } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BrandLogo } from "@/components/site/BrandLogo";
 
 const links = [
   { to: "/", label: "الرئيسية" },
@@ -15,21 +16,9 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur">
+    <header className="sticky top-0 z-50 border-b border-border/70 bg-background/95 backdrop-blur">
       <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 py-3 sm:px-6">
-        <Link to="/" className="flex min-w-0 items-center gap-2">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground">
-            <GraduationCap className="h-5 w-5" />
-          </span>
-          <span className="min-w-0">
-            <span className="block truncate font-display text-lg font-extrabold leading-tight">
-              Study DZ
-            </span>
-            <span className="block truncate text-xs text-muted-foreground">
-              منصة تعليمية جزائرية
-            </span>
-          </span>
-        </Link>
+        <BrandLogo />
 
         <nav className="hidden items-center gap-1 lg:flex">
           {links.map((l) => (

@@ -1,8 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  GraduationCap,
-  School,
-  Users,
   BookOpen,
   ClipboardCheck,
   BarChart3,
@@ -11,7 +8,6 @@ import {
   CloudDownload,
   MessageSquare,
   Wallet,
-  CheckCircle2,
   ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -44,44 +40,6 @@ const steps = [
   { n: "4", t: "التفعيل خلال 24 ساعة", d: "بعد التحقق اليدوي من الإدارة يُفعّل حسابك مباشرة." },
 ];
 
-const roles = [
-  {
-    icon: School,
-    title: "لوحة مدير المؤسسة",
-    items: [
-      "إدارة الأساتذة والطلاب (إضافة وحذف)",
-      "إنشاء الأقسام والشعب والتخصصات",
-      "ربط الأستاذ بالمادة والقسم",
-      "شعار وألوان خاصة بالمؤسسة",
-      "متابعة النتائج والحضور والنشاط",
-      "إدارة الاشتراك والتجديد",
-    ],
-  },
-  {
-    icon: GraduationCap,
-    title: "لوحة الأستاذ",
-    items: [
-      "موادي وأقسامي فقط",
-      "إنشاء الدروس ورفع PDF والفيديو",
-      "إنشاء الاختبارات مع تصحيح آلي",
-      "نتائج الطلاب حسب القسم والشعبة",
-      "الجدول الدراسي والإعلانات",
-      "لا يرى بيانات مؤسسات أو أقسام أخرى",
-    ],
-  },
-  {
-    icon: Users,
-    title: "لوحة الطالب",
-    items: [
-      "مشاهدة الدروس وتحديدها كمكتملة",
-      "تحميل الملفات المسموحة",
-      "اجتياز الاختبارات وإرسال الواجبات",
-      "نتائجي فقط دون رؤية نتائج غيري",
-      "الجدول الدراسي والإعلانات",
-      "إشعارات فورية من الأستاذ والإدارة",
-    ],
-  },
-];
 
 const features = [
   { icon: BookOpen, t: "محتوى تعليمي غني", d: "دروس فيديو، ملفات PDF، عروض تقديمية ومكتبة تعليمية." },
@@ -99,32 +57,26 @@ function Home() {
     <div className="min-h-screen">
       <SiteHeader />
 
-      <section className="surface-hero relative overflow-hidden">
+      <section className="surface-hero relative overflow-hidden border-b border-border">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
-          <span className="inline-flex items-center gap-2 rounded-full border border-primary-foreground/25 bg-primary-foreground/10 px-4 py-1.5 text-xs font-semibold text-primary-foreground">
+          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-4 py-1.5 text-xs font-semibold text-foreground">
             منصة سحابية جزائرية · نظام SaaS متعدد المؤسسات
           </span>
-          <h1 className="mt-6 max-w-3xl text-4xl leading-[1.25] text-primary-foreground sm:text-5xl lg:text-6xl">
+          <h1 className="mt-6 max-w-3xl text-4xl leading-[1.25] sm:text-5xl lg:text-6xl">
             حوّل مؤسستك إلى <span className="text-gold">مؤسسة تعليمية رقمية</span> متكاملة
           </h1>
-          <p className="mt-5 max-w-2xl text-base leading-8 text-primary-foreground/85 sm:text-lg">
+          <p className="mt-5 max-w-2xl text-base leading-8 text-muted-foreground sm:text-lg">
             Study DZ منصة موجّهة للمدارس الخاصة، مراكز الدعم، المعاهد ومراكز التكوين المهني في
-            الجزائر. إدارة كاملة للأساتذة والطلاب والأقسام، مع دروس واختبارات ونتائج ولوحة تحكم
-            خاصة لكل مستخدم.
+            الجزائر. إدارة كاملة للأساتذة والطلاب والأقسام، مع دروس واختبارات ونتائج.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Button asChild size="lg" variant="secondary">
+            <Button asChild size="lg">
               <Link to="/register">
                 سجّل مؤسستك الآن
                 <ArrowLeft className="h-4 w-4" />
               </Link>
             </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="border-primary-foreground/35 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
-            >
+            <Button asChild size="lg" variant="outline">
               <Link to="/pricing">اطّلع على الأسعار</Link>
             </Button>
           </div>
@@ -135,19 +87,15 @@ function Home() {
               ["أساتذة وطلاب وأقسام", "غير محدود"],
               ["تفعيل الحساب", "خلال 24 ساعة"],
             ].map(([label, value]) => (
-              <div
-                key={label}
-                className="rounded-2xl border border-primary-foreground/20 bg-primary-foreground/10 p-5"
-              >
-                <dt className="text-xs text-primary-foreground/75">{label}</dt>
-                <dd className="mt-1 font-display text-2xl font-extrabold text-primary-foreground">
-                  {value}
-                </dd>
+              <div key={label} className="rounded-2xl border border-border bg-card p-5">
+                <dt className="text-xs text-muted-foreground">{label}</dt>
+                <dd className="mt-1 font-display text-2xl font-extrabold">{value}</dd>
               </div>
             ))}
           </dl>
         </div>
       </section>
+
 
       <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <h2 className="text-center text-3xl">كيف تعمل المنصة؟</h2>
@@ -167,32 +115,8 @@ function Home() {
         </ol>
       </section>
 
-      <section className="bg-secondary/40 py-20">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <h2 className="text-center text-3xl">لوحة تحكم خاصة لكل مستخدم</h2>
-          <p className="mx-auto mt-3 max-w-2xl text-center text-muted-foreground">
-            صلاحيات دقيقة تمنع أي تداخل بين المؤسسات أو بين الأقسام.
-          </p>
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
-            {roles.map((r) => (
-              <article key={r.title} className="card-soft p-6">
-                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-primary text-primary-foreground">
-                  <r.icon className="h-6 w-6" />
-                </span>
-                <h3 className="mt-4 text-xl">{r.title}</h3>
-                <ul className="mt-4 space-y-2.5">
-                  {r.items.map((i) => (
-                    <li key={i} className="flex gap-2 text-sm leading-6 text-muted-foreground">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                      <span>{i}</span>
-                    </li>
-                  ))}
-                </ul>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
+
+
 
       <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <h2 className="text-center text-3xl">فوائد المؤسسات</h2>
