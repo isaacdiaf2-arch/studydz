@@ -258,7 +258,7 @@ export const setContractStatus = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!contract) throw new Error("العقد غير موجود.");
 
-    const patch: Record<string, unknown> = { status: data.status };
+    const patch: { status: typeof data.status; expires_at?: string } = { status: data.status };
     if (data.status === "renewed") {
       const expires = new Date();
       expires.setMonth(expires.getMonth() + (contract.duration_months ?? 12));
@@ -276,6 +276,7 @@ export const setContractStatus = createServerFn({ method: "POST" })
     }
 
     const { error } = await supabaseAdmin.from("contracts").update(patch).eq("id", contract.id);
+
     if (error) throw new Error(error.message);
 
     const notes: Record<string, string> = {
