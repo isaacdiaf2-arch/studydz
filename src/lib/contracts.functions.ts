@@ -1,62 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-
-export const CONTRACT_AMOUNT = 7000;
-export const CONTRACT_MONTHS = 12;
-
-export type ContractStatus =
-  | "created"
-  | "awaiting_institution"
-  | "awaiting_platform"
-  | "approved"
-  | "renewed"
-  | "expired"
-  | "cancelled";
-
-async function institutionAdminContext(context: { userId: string; supabase: any }) {
-  const { data } = await context.supabase
-    .from("user_roles")
-    .select("institution_id")
-    .eq("user_id", context.userId)
-    .eq("role", "institution_admin")
-    .maybeSingle();
-  if (!data?.institution_id) throw new Error("غير مسموح: هذه العملية لمدير المؤسسة فقط.");
-  return data.institution_id as string;
-}
-
-async function requirePlatformAdmin(context: { userId: string; supabase: any }) {
-  const { data } = await context.supabase
-    .from("user_roles")
-    .select("id")
-    .eq("user_id", context.userId)
-    .eq("role", "platform_admin")
-    .maybeSingle();
-  if (!data) throw new Error("غير مسموح: مدير المنصة فقط.");
-}
-
-function contractNumber() {
-  const year = new Date().getFullYear();
-  const rand = Math.floor(100000 + Math.random() * 900000);
-  return `SDZ-${year}-${rand}`;
-}
-
-async function logEvent(
-  admin: any,
-  contractId: string,
-  institutionId: string,
-  status: ContractStatus,
-  note: string,
-  actorId: string | null,
-) {
-  await admin.from("contract_events").insert({
-    contract_id: contractId,
-    institution_id: institutionId,
-    status,
-    note,
-    actor_id: actorId,
-  });
-}
+import type { ContractStatus } from "./contracts.shared";
+import { CONTRACT_AMOUNT, CONTRACT_MONTHS } from "./contracts.shared";
+import {
+  contractNumber,
+  institutionAdminContext,
+  logEvent,
+  requirePlatformAdmin,
+} from "./contracts.server";
 
 /** Stage 1 — institution admin creates the contract from stored data. */
 export const createContract = createServerFn({ method: "POST" })
