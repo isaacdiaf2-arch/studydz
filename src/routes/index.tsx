@@ -167,32 +167,8 @@ function Home() {
         </ol>
       </section>
 
-      <section className="bg-secondary/40 py-20">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <h2 className="text-center text-3xl">لوحة تحكم خاصة لكل مستخدم</h2>
-          <p className="mx-auto mt-3 max-w-2xl text-center text-muted-foreground">
-            صلاحيات دقيقة تمنع أي تداخل بين المؤسسات أو بين الأقسام.
-          </p>
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
-            {roles.map((r) => (
-              <article key={r.title} className="card-soft p-6">
-                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-primary text-primary-foreground">
-                  <r.icon className="h-6 w-6" />
-                </span>
-                <h3 className="mt-4 text-xl">{r.title}</h3>
-                <ul className="mt-4 space-y-2.5">
-                  {r.items.map((i) => (
-                    <li key={i} className="flex gap-2 text-sm leading-6 text-muted-foreground">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                      <span>{i}</span>
-                    </li>
-                  ))}
-                </ul>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
+
+
 
       <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <h2 className="text-center text-3xl">فوائد المؤسسات</h2>
