@@ -426,9 +426,10 @@ function AdminDashboard() {
           ))}
           {signingContract && (
             <SignatureSheet
+              open
               title="إمضاء مدير المنصة"
-              onCancel={() => setSigningContract(null)}
-              onSave={(signature) =>
+              onClose={() => setSigningContract(null)}
+              onConfirm={(signature: string) =>
                 signContract.mutate({ contractId: signingContract, signature })
               }
             />
