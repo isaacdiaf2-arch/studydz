@@ -207,36 +207,104 @@ export type Database = {
           },
         ]
       }
-      contracts: {
+      contract_events: {
         Row: {
-          body: string
+          actor_id: string | null
+          contract_id: string
           created_at: string
           id: string
           institution_id: string
-          institution_signature: string | null
-          platform_signature: string | null
-          qr_payload: string | null
-          signed_at: string | null
+          note: string | null
+          status: Database["public"]["Enums"]["contract_status"]
         }
         Insert: {
-          body: string
+          actor_id?: string | null
+          contract_id: string
           created_at?: string
           id?: string
           institution_id: string
-          institution_signature?: string | null
-          platform_signature?: string | null
-          qr_payload?: string | null
-          signed_at?: string | null
+          note?: string | null
+          status: Database["public"]["Enums"]["contract_status"]
         }
         Update: {
-          body?: string
+          actor_id?: string | null
+          contract_id?: string
           created_at?: string
           id?: string
           institution_id?: string
+          note?: string | null
+          status?: Database["public"]["Enums"]["contract_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_events_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contracts: {
+        Row: {
+          amount: number
+          approved_at: string | null
+          body: string
+          contract_number: string | null
+          created_at: string
+          duration_months: number
+          expires_at: string | null
+          id: string
+          institution_id: string
+          institution_signature: string | null
+          institution_signed_at: string | null
+          platform_signature: string | null
+          platform_signed_at: string | null
+          qr_payload: string | null
+          signed_at: string | null
+          snapshot: Json
+          status: Database["public"]["Enums"]["contract_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          approved_at?: string | null
+          body: string
+          contract_number?: string | null
+          created_at?: string
+          duration_months?: number
+          expires_at?: string | null
+          id?: string
+          institution_id: string
           institution_signature?: string | null
+          institution_signed_at?: string | null
           platform_signature?: string | null
+          platform_signed_at?: string | null
           qr_payload?: string | null
           signed_at?: string | null
+          snapshot?: Json
+          status?: Database["public"]["Enums"]["contract_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          approved_at?: string | null
+          body?: string
+          contract_number?: string | null
+          created_at?: string
+          duration_months?: number
+          expires_at?: string | null
+          id?: string
+          institution_id?: string
+          institution_signature?: string | null
+          institution_signed_at?: string | null
+          platform_signature?: string | null
+          platform_signed_at?: string | null
+          qr_payload?: string | null
+          signed_at?: string | null
+          snapshot?: Json
+          status?: Database["public"]["Enums"]["contract_status"]
+          updated_at?: string
         }
         Relationships: [
           {
@@ -409,6 +477,7 @@ export type Database = {
       institutions: {
         Row: {
           address: string | null
+          commercial_register: string | null
           commune: string
           created_at: string
           email: string
@@ -425,6 +494,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          commercial_register?: string | null
           commune: string
           created_at?: string
           email: string
@@ -441,6 +511,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          commercial_register?: string | null
           commune?: string
           created_at?: string
           email?: string
@@ -604,6 +675,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      password_reset_requests: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          institution_id: string | null
+          note: string | null
+          resolved_at: string | null
+          role: Database["public"]["Enums"]["app_role"] | null
+          status: string
+          target: string
+          temp_code: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id?: string
+          institution_id?: string | null
+          note?: string | null
+          resolved_at?: string | null
+          role?: Database["public"]["Enums"]["app_role"] | null
+          status?: string
+          target?: string
+          temp_code?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          institution_id?: string | null
+          note?: string | null
+          resolved_at?: string | null
+          role?: Database["public"]["Enums"]["app_role"] | null
+          status?: string
+          target?: string
+          temp_code?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
       }
       payments: {
         Row: {
@@ -936,6 +1055,14 @@ export type Database = {
     }
     Enums: {
       app_role: "platform_admin" | "institution_admin" | "teacher" | "student"
+      contract_status:
+        | "created"
+        | "awaiting_institution"
+        | "awaiting_platform"
+        | "approved"
+        | "renewed"
+        | "expired"
+        | "cancelled"
       institution_status: "pending" | "active" | "suspended" | "expired"
       payment_status: "pending" | "accepted" | "rejected" | "suspended"
       question_type: "mcq" | "truefalse" | "short"
@@ -1067,6 +1194,15 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["platform_admin", "institution_admin", "teacher", "student"],
+      contract_status: [
+        "created",
+        "awaiting_institution",
+        "awaiting_platform",
+        "approved",
+        "renewed",
+        "expired",
+        "cancelled",
+      ],
       institution_status: ["pending", "active", "suspended", "expired"],
       payment_status: ["pending", "accepted", "rejected", "suspended"],
       question_type: ["mcq", "truefalse", "short"],
