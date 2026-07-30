@@ -80,12 +80,19 @@ function AuthPage() {
           </Button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-muted-foreground">
+        <p className="mt-4 text-center text-sm">
+          <Link to="/forgot-password" className="font-semibold text-foreground underline">
+            نسيت كلمة المرور؟
+          </Link>
+        </p>
+
+        <p className="mt-4 text-center text-sm text-muted-foreground">
           مؤسسة جديدة؟{" "}
           <Link to="/register" className="font-semibold text-foreground underline">
             سجّل مؤسستك
           </Link>
         </p>
+
       </main>
     </div>
   );
