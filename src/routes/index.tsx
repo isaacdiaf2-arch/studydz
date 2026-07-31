@@ -1,18 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  BookOpen,
-  ClipboardCheck,
-  BarChart3,
-  ShieldCheck,
-  Smartphone,
-  CloudDownload,
-  MessageSquare,
-  Wallet,
-  ArrowLeft,
-} from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
