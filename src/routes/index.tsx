@@ -118,41 +118,24 @@ function Home() {
 
 
 
-      <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-        <h2 className="text-center text-3xl">فوائد المؤسسات</h2>
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {features.map((f) => (
-            <article key={f.t} className="card-soft p-6">
-              <f.icon className="h-6 w-6 text-primary" />
-              <h3 className="mt-4 text-base">{f.t}</h3>
-              <p className="mt-2 text-sm leading-7 text-muted-foreground">{f.d}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
       <section className="mx-auto max-w-6xl px-4 pb-4 sm:px-6">
-        <div className="surface-hero rounded-4xl px-6 py-14 text-center sm:px-12">
-          <h2 className="text-3xl text-primary-foreground">جاهز لرقمنة مؤسستك؟</h2>
-          <p className="mx-auto mt-3 max-w-xl text-primary-foreground/85">
+        <div className="surface-hero rounded-4xl border border-border px-6 py-14 text-center sm:px-12">
+          <h2 className="text-3xl text-foreground">جاهز لرقمنة مؤسستك؟</h2>
+          <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
             سجّل مؤسستك اليوم، ادفع 7,000 دج عبر CCP، وارفع وصل الدفع ليتم تفعيل حسابك خلال 24
             ساعة.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-            <Button asChild size="lg" variant="secondary">
+            <Button asChild size="lg">
               <Link to="/register">تسجيل مؤسسة جديدة</Link>
             </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="border-primary-foreground/35 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
-            >
+            <Button asChild size="lg" variant="outline">
               <Link to="/contact">طلب تجربة أو تواصل</Link>
             </Button>
           </div>
         </div>
       </section>
+
 
       <SiteFooter />
     </div>
