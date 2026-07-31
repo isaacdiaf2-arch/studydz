@@ -940,6 +940,7 @@ function AlertRow({ text, onClick }: { text: string; onClick: () => void }) {
 
 function EventRow({
   event,
+  institutionName,
 }: {
   event: {
     id: string;
@@ -947,13 +948,14 @@ function EventRow({
     note: string | null;
     created_at: string;
     contracts?: { contract_number: string | null } | null;
-    institutions?: { name: string } | null;
   };
+  institutionName?: string;
 }) {
   return (
     <div className="card-soft flex flex-wrap items-center gap-2 p-3 text-sm">
       <Activity className="h-4 w-4 shrink-0 text-muted-foreground" />
-      <span className="font-semibold">{event.institutions?.name ?? "—"}</span>
+      <span className="font-semibold">{institutionName ?? "—"}</span>
+
       <span className="text-muted-foreground">{event.note ?? event.status}</span>
       <span className="text-xs text-muted-foreground" dir="ltr">
         {event.contracts?.contract_number ?? ""}
