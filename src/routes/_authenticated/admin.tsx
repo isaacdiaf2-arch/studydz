@@ -153,7 +153,7 @@ function AdminDashboard() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("contract_events")
-        .select("*, contracts(contract_number), institutions(name)")
+        .select("*, contracts(contract_number)")
         .order("created_at", { ascending: false })
         .limit(100);
       if (error) throw error;
