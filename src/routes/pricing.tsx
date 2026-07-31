@@ -50,12 +50,13 @@ function Pricing() {
         </p>
 
         <div className="card-soft mt-10 overflow-hidden">
-          <div className="surface-hero px-6 py-8 text-center sm:px-10">
-            <p className="text-sm font-semibold text-primary-foreground/85">🟢 الباقة الأساسية</p>
-            <p className="mt-3 font-display text-5xl font-extrabold text-primary-foreground">
+          <div className="surface-hero border-b border-border px-6 py-8 text-center sm:px-10">
+            <p className="text-sm font-semibold text-muted-foreground">🟢 الباقة الأساسية</p>
+            <p className="mt-3 font-display text-5xl font-extrabold text-foreground">
               7,000 <span className="text-2xl">دج</span>
             </p>
-            <p className="mt-1 text-sm text-primary-foreground/80">اشتراك سنوي لكل مؤسسة</p>
+            <p className="mt-1 text-sm text-muted-foreground">اشتراك سنوي لكل مؤسسة</p>
+
           </div>
           <div className="p-6 sm:p-10">
             <ul className="grid gap-3 sm:grid-cols-2">

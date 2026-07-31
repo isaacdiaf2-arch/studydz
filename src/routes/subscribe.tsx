@@ -68,12 +68,13 @@ function Subscribe() {
         </div>
 
         <div className="card-soft mt-8 overflow-hidden">
-          <div className="surface-hero p-6">
-            <h2 className="text-xl text-primary-foreground">معلومات الدفع</h2>
-            <p className="mt-1 text-sm text-primary-foreground/80">
+          <div className="surface-hero border-b border-border p-6">
+            <h2 className="text-xl text-foreground">معلومات الدفع</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
               المبلغ المطلوب: 7,000.00 دج — دفع سنوي
             </p>
           </div>
+
           <dl className="grid gap-4 p-6 sm:grid-cols-3">
             <div>
               <dt className="text-xs text-muted-foreground">الاسم واللقب المستفيد</dt>

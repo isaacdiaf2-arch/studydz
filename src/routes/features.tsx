@@ -9,10 +9,25 @@ import {
   BarChart3,
   BookOpen,
   CheckCircle2,
+  ClipboardCheck,
+  Smartphone,
+  CloudDownload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
+
+const benefits = [
+  { icon: BookOpen, t: "محتوى تعليمي غني", d: "دروس فيديو، ملفات PDF، عروض تقديمية ومكتبة تعليمية." },
+  { icon: ClipboardCheck, t: "اختبارات إلكترونية", d: "اختيار من متعدد، صح/خطأ وإجابة قصيرة مع تصحيح تلقائي وتوقيت." },
+  { icon: BarChart3, t: "تقارير ذكية", d: "نسبة إنجاز الدروس، المتوسطات، نقاط القوة والضعف وتقرير شهري." },
+  { icon: ShieldCheck, t: "أمان وعزل البيانات", d: "نظام متعدد المؤسسات: كل مؤسسة ترى بياناتها فقط، مع سجل عمليات ونسخ احتياطية." },
+  { icon: Smartphone, t: "متجاوب 100%", d: "واجهة مهيأة للهواتف واللوحيات والحواسيب بدعم كامل للعربية." },
+  { icon: CloudDownload, t: "عمل دون اتصال", d: "تحميل الدروس للمطالعة دون إنترنت مع مزامنة عند عودة الاتصال." },
+  { icon: MessageSquare, t: "تواصل مباشر", d: "رسائل بين الإدارة والأستاذ والطالب، وأسئلة تحت كل درس." },
+  { icon: Wallet, t: "إدارة مالية", d: "اشتراك المؤسسة، رسوم الطلاب، الفواتير وسجل المدفوعات." },
+];
+
 
 export const Route = createFileRoute("/features")({
   head: () => ({
@@ -233,6 +248,17 @@ function Features() {
           ))}
         </div>
 
+        <h2 className="mt-16 text-3xl">فوائد المؤسسات</h2>
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {benefits.map((f) => (
+            <article key={f.t} className="card-soft p-6">
+              <f.icon className="h-6 w-6 text-primary" />
+              <h3 className="mt-4 text-base">{f.t}</h3>
+              <p className="mt-2 text-sm leading-7 text-muted-foreground">{f.d}</p>
+            </article>
+          ))}
+        </div>
+
         <div className="mt-14 grid gap-6 md:grid-cols-3">
           {[
             { icon: School, t: "مساحة مستقلة", d: "كل مؤسسة تحصل على منصة خاصة بها داخل نفس النظام مع نطاق فرعي خاص." },
@@ -246,6 +272,7 @@ function Features() {
             </article>
           ))}
         </div>
+
 
         <div className="mt-14 text-center">
           <Button asChild size="lg">
