@@ -9,10 +9,25 @@ import {
   BarChart3,
   BookOpen,
   CheckCircle2,
+  ClipboardCheck,
+  Smartphone,
+  CloudDownload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
+
+const benefits = [
+  { icon: BookOpen, t: "محتوى تعليمي غني", d: "دروس فيديو، ملفات PDF، عروض تقديمية ومكتبة تعليمية." },
+  { icon: ClipboardCheck, t: "اختبارات إلكترونية", d: "اختيار من متعدد، صح/خطأ وإجابة قصيرة مع تصحيح تلقائي وتوقيت." },
+  { icon: BarChart3, t: "تقارير ذكية", d: "نسبة إنجاز الدروس، المتوسطات، نقاط القوة والضعف وتقرير شهري." },
+  { icon: ShieldCheck, t: "أمان وعزل البيانات", d: "نظام متعدد المؤسسات: كل مؤسسة ترى بياناتها فقط، مع سجل عمليات ونسخ احتياطية." },
+  { icon: Smartphone, t: "متجاوب 100%", d: "واجهة مهيأة للهواتف واللوحيات والحواسيب بدعم كامل للعربية." },
+  { icon: CloudDownload, t: "عمل دون اتصال", d: "تحميل الدروس للمطالعة دون إنترنت مع مزامنة عند عودة الاتصال." },
+  { icon: MessageSquare, t: "تواصل مباشر", d: "رسائل بين الإدارة والأستاذ والطالب، وأسئلة تحت كل درس." },
+  { icon: Wallet, t: "إدارة مالية", d: "اشتراك المؤسسة، رسوم الطلاب، الفواتير وسجل المدفوعات." },
+];
+
 
 export const Route = createFileRoute("/features")({
   head: () => ({
