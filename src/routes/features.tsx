@@ -233,6 +233,17 @@ function Features() {
           ))}
         </div>
 
+        <h2 className="mt-16 text-3xl">فوائد المؤسسات</h2>
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {benefits.map((f) => (
+            <article key={f.t} className="card-soft p-6">
+              <f.icon className="h-6 w-6 text-primary" />
+              <h3 className="mt-4 text-base">{f.t}</h3>
+              <p className="mt-2 text-sm leading-7 text-muted-foreground">{f.d}</p>
+            </article>
+          ))}
+        </div>
+
         <div className="mt-14 grid gap-6 md:grid-cols-3">
           {[
             { icon: School, t: "مساحة مستقلة", d: "كل مؤسسة تحصل على منصة خاصة بها داخل نفس النظام مع نطاق فرعي خاص." },
@@ -246,6 +257,7 @@ function Features() {
             </article>
           ))}
         </div>
+
 
         <div className="mt-14 text-center">
           <Button asChild size="lg">
