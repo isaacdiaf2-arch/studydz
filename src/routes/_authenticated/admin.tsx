@@ -411,7 +411,8 @@ function AdminDashboard() {
           <div className="space-y-2">
             {(events.data ?? []).length === 0 && <EmptyState text="لا توجد عمليات مسجّلة." />}
             {(events.data ?? []).slice(0, 6).map((e) => (
-              <EventRow key={e.id} event={e} />
+              <EventRow key={e.id} event={e} institutionName={instNames.get(e.institution_id)} />
+
             ))}
           </div>
         </div>
