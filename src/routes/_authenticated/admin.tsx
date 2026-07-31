@@ -286,7 +286,13 @@ function AdminDashboard() {
     );
   }, [list, instQuery, instFilter]);
 
+  const instNames = useMemo(
+    () => new Map(list.map((i) => [i.id, i.name])),
+    [list],
+  );
+
   const roleByUser = useMemo(() => {
+
     const map = new Map<string, string[]>();
     roleList.forEach((r) => {
       map.set(r.user_id, [...(map.get(r.user_id) ?? []), r.role]);
