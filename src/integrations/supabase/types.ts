@@ -863,39 +863,89 @@ export type Database = {
           },
         ]
       }
+      rooms: {
+        Row: {
+          capacity: number | null
+          created_at: string
+          id: string
+          institution_id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          capacity?: number | null
+          created_at?: string
+          id?: string
+          institution_id: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          capacity?: number | null
+          created_at?: string
+          id?: string
+          institution_id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rooms_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       schedules: {
         Row: {
+          archived: boolean
           class_id: string
           created_at: string
           day_of_week: number
           end_time: string | null
           id: string
           institution_id: string
+          label: string | null
+          period_index: number
+          room_id: string | null
           start_time: string
           subject_id: string | null
           teacher_id: string | null
+          updated_at: string
         }
         Insert: {
+          archived?: boolean
           class_id: string
           created_at?: string
           day_of_week: number
           end_time?: string | null
           id?: string
           institution_id: string
+          label?: string | null
+          period_index?: number
+          room_id?: string | null
           start_time: string
           subject_id?: string | null
           teacher_id?: string | null
+          updated_at?: string
         }
         Update: {
+          archived?: boolean
           class_id?: string
           created_at?: string
           day_of_week?: number
           end_time?: string | null
           id?: string
           institution_id?: string
+          label?: string | null
+          period_index?: number
+          room_id?: string | null
           start_time?: string
           subject_id?: string | null
           teacher_id?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
@@ -910,6 +960,13 @@ export type Database = {
             columns: ["institution_id"]
             isOneToOne: false
             referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "schedules_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
             referencedColumns: ["id"]
           },
           {
