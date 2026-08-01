@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import logo from "@/assets/studydz-logo.png.asset.json";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ export function BrandLogo({
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const unlock = useServerFn(unlockPlatformAdmin);
+  const queryClient = useQueryClient();
 
   function handleNameClick(e: React.MouseEvent) {
     clicks.current += 1;
@@ -52,13 +54,15 @@ export function BrandLogo({
     try {
       const { data } = await supabase.auth.getUser();
       if (!data.user) {
+        sessionStorage.setItem("sdz_pending_unlock", code);
         setBusy(false);
         setOpen(false);
-        toast.info("سجّل الدخول أولًا ثم أعد المحاولة.");
+        toast.info("سجّل الدخول أولًا وسيتم فتح لوحة مدير المنصة تلقائيًا.");
         navigate({ to: "/auth", search: { redirect: "/admin" } });
         return;
       }
       await unlock({ data: { code } });
+      await queryClient.invalidateQueries({ queryKey: ["account"] });
       toast.success("تم فتح لوحة مدير المنصة.");
       setOpen(false);
       setCode("");

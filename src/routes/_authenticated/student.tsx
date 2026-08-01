@@ -2,12 +2,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { BarChart3, BookOpen, ClipboardList, FileText, Megaphone, Table2 } from "lucide-react";
+import { BarChart3, BookOpen, CalendarDays, ClipboardList, FileText, Megaphone, Table2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { DashboardShell, StatCard, EmptyState } from "@/components/dashboard/DashboardShell";
 import { useAccount } from "@/lib/account";
+import { useScheduleView } from "@/lib/useScheduleView";
+import { TodayScheduleCard, WeekScheduleGrid } from "@/components/dashboard/ScheduleViews";
 import { getExamForStudent, submitExam } from "@/lib/exam.functions";
 
 
@@ -17,6 +19,7 @@ export const Route = createFileRoute("/_authenticated/student")({
 
 const nav = [
   { key: "home", label: "الرئيسية", icon: BarChart3 },
+  { key: "schedule", label: "جدولي", icon: CalendarDays },
   { key: "subjects", label: "موادي", icon: BookOpen },
   { key: "lessons", label: "دروسي", icon: FileText },
   { key: "exams", label: "الاختبارات", icon: ClipboardList },
@@ -31,6 +34,26 @@ function StudentDashboard() {
   const queryClient = useQueryClient();
   const userId = account.data?.user?.id;
   const institutionId = account.data?.profile?.institution_id as string | undefined;
+
+  const enrollments = useQuery({
+    queryKey: ["student", "enrollments", userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("enrollments")
+        .select("class_id")
+        .eq("student_id", userId!);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const classIds = (enrollments.data ?? []).map((e) => e.class_id);
+  const schedule = useScheduleView({
+    institutionId,
+    classIds,
+    cacheKey: `student_${userId ?? "anon"}`,
+  });
 
   const subjects = useQuery({
     queryKey: ["student", "subjects", institutionId],
@@ -126,7 +149,22 @@ function StudentDashboard() {
               icon={ClipboardList}
             />
           </div>
+          <TodayScheduleCard
+            rows={schedule.rows}
+            role="student"
+            teacherNames={schedule.teacherNames}
+            offlineAt={schedule.offlineAt}
+          />
         </div>
+      )}
+
+      {tab === "schedule" && (
+        <WeekScheduleGrid
+          rows={schedule.rows}
+          role="student"
+          teacherNames={schedule.teacherNames}
+          title="📅 جدولي الدراسي"
+        />
       )}
 
       {tab === "subjects" && (

@@ -3,6 +3,9 @@ import { useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { useQueryClient } from "@tanstack/react-query";
+import { unlockPlatformAdmin } from "@/lib/auth.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,6 +35,8 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const unlock = useServerFn(unlockPlatformAdmin);
+  const queryClient = useQueryClient();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -42,7 +47,20 @@ function AuthPage() {
       toast.error("تعذّر تسجيل الدخول: تحقّق من البريد وكلمة المرور.");
       return;
     }
-    navigate({ to: search.redirect ?? "/dashboard" });
+    const pending = sessionStorage.getItem("sdz_pending_unlock");
+    if (pending) {
+      sessionStorage.removeItem("sdz_pending_unlock");
+      try {
+        await unlock({ data: { code: pending } });
+        await queryClient.invalidateQueries({ queryKey: ["account"] });
+        toast.success("تم فتح لوحة مدير المنصة.");
+        navigate({ to: "/admin" });
+        return;
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "تعذّر فتح لوحة مدير المنصة.");
+      }
+    }
+    navigate({ to: search.redirect === "/admin" ? "/dashboard" : (search.redirect ?? "/dashboard") });
   }
 
   return (
