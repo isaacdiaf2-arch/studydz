@@ -44,8 +44,6 @@ const nav = [
   { key: "settings", label: "الإعدادات", icon: Settings },
 ];
 
-const days = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
-
 function InstitutionDashboard() {
   const [tab, setTab] = useState("home");
   const queryClient = useQueryClient();
@@ -96,20 +94,6 @@ function InstitutionDashboard() {
         .select("*, classes(name)")
         .eq("institution_id", institutionId!)
         .order("created_at");
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const schedules = useQuery({
-    queryKey: ["institution", "schedules", institutionId],
-    enabled: !!institutionId,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("schedules")
-        .select("*, classes(name), subjects(name)")
-        .eq("institution_id", institutionId!)
-        .order("day_of_week");
       if (error) throw error;
       return data;
     },
