@@ -24,6 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { DashboardShell, StatCard, EmptyState } from "@/components/dashboard/DashboardShell";
 import { SignaturePad } from "@/components/dashboard/SignaturePad";
 import { useAccount } from "@/lib/account";
+import { SchedulesManager } from "@/components/dashboard/SchedulesManager";
 import { createMember, deleteMember, transferStudent } from "@/lib/platform.functions";
 
 export const Route = createFileRoute("/_authenticated/institution")({
@@ -42,8 +43,6 @@ const nav = [
   { key: "contract", label: "العقد", icon: FileSignature },
   { key: "settings", label: "الإعدادات", icon: Settings },
 ];
-
-const days = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
 
 function InstitutionDashboard() {
   const [tab, setTab] = useState("home");
@@ -95,20 +94,6 @@ function InstitutionDashboard() {
         .select("*, classes(name)")
         .eq("institution_id", institutionId!)
         .order("created_at");
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const schedules = useQuery({
-    queryKey: ["institution", "schedules", institutionId],
-    enabled: !!institutionId,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("schedules")
-        .select("*, classes(name), subjects(name)")
-        .eq("institution_id", institutionId!)
-        .order("day_of_week");
       if (error) throw error;
       return data;
     },
@@ -268,14 +253,15 @@ function InstitutionDashboard() {
       )}
 
       {tab === "schedule" && institutionId && (
-        <ScheduleSection
+        <SchedulesManager
           institutionId={institutionId}
           classes={classes.data ?? []}
           subjects={subjects.data ?? []}
-          schedules={schedules.data ?? []}
+          teachers={teachers}
           onDone={invalidate}
         />
       )}
+
 
       {tab === "announcements" && institutionId && (
         <AnnouncementsSection
@@ -636,119 +622,6 @@ function SubjectsSection({
   );
 }
 
-function ScheduleSection({
-  institutionId,
-  classes,
-  subjects,
-  schedules,
-  onDone,
-}: {
-  institutionId: string;
-  classes: { id: string; name: string }[];
-  subjects: { id: string; name: string; teacher_id: string | null }[];
-  schedules: {
-    id: string;
-    day_of_week: number;
-    start_time: string;
-    classes: { name: string } | null;
-    subjects: { name: string } | null;
-  }[];
-  onDone: () => void;
-}) {
-  const [form, setForm] = useState({ classId: "", subjectId: "", day: "0", start: "08:00" });
-  return (
-    <div className="space-y-4">
-      <form
-        className="card-soft space-y-4 p-4"
-        onSubmit={async (e) => {
-          e.preventDefault();
-          const subject = subjects.find((s) => s.id === form.subjectId);
-          const { error } = await supabase.from("schedules").insert({
-            institution_id: institutionId,
-            class_id: form.classId,
-            subject_id: form.subjectId || null,
-            teacher_id: subject?.teacher_id ?? null,
-            day_of_week: Number(form.day),
-            start_time: form.start,
-          });
-          if (error) toast.error(error.message);
-          else {
-            toast.success("تمت إضافة الحصة.");
-            onDone();
-          }
-        }}
-      >
-        <h2 className="text-lg">إضافة حصة إلى الجدول</h2>
-        <div className="grid gap-3 sm:grid-cols-4">
-          <div className="grid gap-2">
-            <Label>القسم</Label>
-            <select
-              required
-              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
-              value={form.classId}
-              onChange={(e) => setForm({ ...form, classId: e.target.value })}
-            >
-              <option value="">اختر</option>
-              {classes.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="grid gap-2">
-            <Label>المادة</Label>
-            <select
-              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
-              value={form.subjectId}
-              onChange={(e) => setForm({ ...form, subjectId: e.target.value })}
-            >
-              <option value="">اختر</option>
-              {subjects.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="grid gap-2">
-            <Label>اليوم</Label>
-            <select
-              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
-              value={form.day}
-              onChange={(e) => setForm({ ...form, day: e.target.value })}
-            >
-              {days.map((d, i) => (
-                <option key={d} value={i}>
-                  {d}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="grid gap-2">
-            <Label>التوقيت</Label>
-            <Input type="time" value={form.start} onChange={(e) => setForm({ ...form, start: e.target.value })} />
-          </div>
-        </div>
-        <Button type="submit">إضافة</Button>
-      </form>
-      <div className="space-y-2">
-        {schedules.length === 0 && <EmptyState text="الجدول فارغ." />}
-        {schedules.map((s) => (
-          <div key={s.id} className="card-soft p-3 text-sm">
-            <p className="font-semibold">
-              {days[s.day_of_week]} — {s.start_time?.slice(0, 5)}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {s.subjects?.name ?? "—"} · {s.classes?.name ?? "—"}
-            </p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function AnnouncementsSection({
   institutionId,
   classes,
@@ -874,7 +747,7 @@ function SubscriptionSection({
           }
           const { error } = await supabase.from("payments").insert({
             institution_id: institutionId,
-            amount: 7000,
+            amount: 8000,
             method: "CCP",
             paid_at: paidAt,
             proof_url: path,
@@ -888,7 +761,7 @@ function SubscriptionSection({
           }
         }}
       >
-        <h2 className="text-lg">رفع وصل الدفع (7,000 دج)</h2>
+        <h2 className="text-lg">رفع وصل الدفع (8,000 دج)</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="grid gap-2">
             <Label htmlFor="paid-at">تاريخ الدفع</Label>

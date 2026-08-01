@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { BarChart3, BookOpen, ClipboardList, FileText, Megaphone, Table2 } from "lucide-react";
+import { BarChart3, BookOpen, CalendarDays, ClipboardList, FileText, Megaphone, Table2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { DashboardShell, StatCard, EmptyState } from "@/components/dashboard/DashboardShell";
 import { useAccount } from "@/lib/account";
+import { useScheduleView } from "@/lib/useScheduleView";
+import { TodayScheduleCard, WeekScheduleGrid } from "@/components/dashboard/ScheduleViews";
 
 export const Route = createFileRoute("/_authenticated/teacher")({
   component: TeacherDashboard,
@@ -17,6 +19,7 @@ export const Route = createFileRoute("/_authenticated/teacher")({
 
 const nav = [
   { key: "home", label: "الرئيسية", icon: BarChart3 },
+  { key: "schedule", label: "جدولي", icon: CalendarDays },
   { key: "subjects", label: "موادي", icon: BookOpen },
   { key: "lessons", label: "الدروس", icon: FileText },
   { key: "exams", label: "الاختبارات", icon: ClipboardList },
@@ -33,6 +36,11 @@ function TeacherDashboard() {
   const userId = account.data?.user?.id;
   const institutionId = account.data?.profile?.institution_id as string | undefined;
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["teacher"] });
+  const schedule = useScheduleView({
+    institutionId,
+    teacherId: userId,
+    cacheKey: `teacher_${userId ?? "anon"}`,
+  });
 
   const subjects = useQuery({
     queryKey: ["teacher", "subjects", userId],
@@ -116,7 +124,22 @@ function TeacherDashboard() {
             <StatCard label="اختبارات" value={exams.data?.length ?? 0} icon={ClipboardList} />
             <StatCard label="محاولات الطلاب" value={attempts.data?.length ?? 0} icon={Table2} />
           </div>
+          <TodayScheduleCard
+            rows={schedule.rows}
+            role="teacher"
+            teacherNames={schedule.teacherNames}
+            offlineAt={schedule.offlineAt}
+          />
         </div>
+      )}
+
+      {tab === "schedule" && (
+        <WeekScheduleGrid
+          rows={schedule.rows}
+          role="teacher"
+          teacherNames={schedule.teacherNames}
+          title="📅 جدولي الدراسي"
+        />
       )}
 
       {tab === "subjects" && (

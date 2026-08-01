@@ -175,3 +175,20 @@
     letter-spacing: 0;
   }
 }
+
+/* طباعة الجداول الدراسية: يُطبع القسم المحدد فقط */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    width: 100%;
+  }
+}
