@@ -268,14 +268,15 @@ function InstitutionDashboard() {
       )}
 
       {tab === "schedule" && institutionId && (
-        <ScheduleSection
+        <SchedulesManager
           institutionId={institutionId}
           classes={classes.data ?? []}
           subjects={subjects.data ?? []}
-          schedules={schedules.data ?? []}
+          teachers={teachers}
           onDone={invalidate}
         />
       )}
+
 
       {tab === "announcements" && institutionId && (
         <AnnouncementsSection
