@@ -14,12 +14,12 @@ export const Route = createFileRoute("/subscribe")({
       {
         name: "description",
         content:
-          "ادفع اشتراك Study DZ السنوي 7,000 دج عبر الحساب البريدي CCP، ثم ارفع وصل الدفع ليتم التحقق وتفعيل حساب مؤسستك خلال 24 ساعة.",
+          "ادفع اشتراك Study DZ السنوي 8,000 دج عبر الحساب البريدي CCP، ثم ارفع وصل الدفع ليتم التحقق وتفعيل حساب مؤسستك خلال 24 ساعة.",
       },
       { property: "og:title", content: "الاشتراك السنوي والدفع عبر CCP | Study DZ" },
       {
         property: "og:description",
-        content: "خطوات الاشتراك: الدفع 7,000 دج عبر CCP، رفع الوصل، ثم التفعيل بعد المراجعة.",
+        content: "خطوات الاشتراك: الدفع 8,000 دج عبر CCP، رفع الوصل، ثم التفعيل بعد المراجعة.",
       },
     ],
   }),
@@ -29,9 +29,9 @@ export const Route = createFileRoute("/subscribe")({
 const flow = [
   "🏫 تسجيل المؤسسة",
   "📄 إنشاء طلب الاشتراك السنوي",
-  "💰 السعر الثابت: 7,000 دج",
+  "💰 السعر الثابت: 8,000 دج",
   "💳 طريقة الدفع: CCP",
-  "📤 دفع 7,000 دج",
+  "📤 دفع 8,000 دج",
   "📸 رفع وصل الدفع",
   "🟡 طلب قيد المراجعة",
   "👨‍💼 مدير المنصة يتحقق من الوصل",
@@ -47,7 +47,7 @@ function Subscribe() {
       <main className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
         <h1 className="text-4xl">الاشتراك السنوي والدفع</h1>
         <p className="mt-3 text-muted-foreground">
-          سعر الاشتراك السنوي ثابت: <strong>7,000 دج</strong> لكل مؤسسة، والدفع يتم حاليًا عبر
+          سعر الاشتراك السنوي ثابت: <strong>8,000 دج</strong> لكل مؤسسة، والدفع يتم حاليًا عبر
           الحساب البريدي CCP مع تحقق يدوي من إدارة المنصة.
         </p>
 
@@ -71,7 +71,7 @@ function Subscribe() {
           <div className="surface-hero border-b border-border p-6">
             <h2 className="text-xl text-foreground">معلومات الدفع</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              المبلغ المطلوب: 7,000.00 دج — دفع سنوي
+              المبلغ المطلوب: 8,000.00 دج — دفع سنوي
             </p>
           </div>
 
@@ -141,7 +141,7 @@ function Subscribe() {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="pay-amount">المبلغ المدفوع (دج)</Label>
-                <Input id="pay-amount" type="number" defaultValue={7000} required />
+                <Input id="pay-amount" type="number" defaultValue={8000} required />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="pay-method">طريقة الدفع</Label>

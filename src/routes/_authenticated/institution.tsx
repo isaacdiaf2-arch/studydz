@@ -874,7 +874,7 @@ function SubscriptionSection({
           }
           const { error } = await supabase.from("payments").insert({
             institution_id: institutionId,
-            amount: 7000,
+            amount: 8000,
             method: "CCP",
             paid_at: paidAt,
             proof_url: path,
@@ -888,7 +888,7 @@ function SubscriptionSection({
           }
         }}
       >
-        <h2 className="text-lg">رفع وصل الدفع (7,000 دج)</h2>
+        <h2 className="text-lg">رفع وصل الدفع (8,000 دج)</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="grid gap-2">
             <Label htmlFor="paid-at">تاريخ الدفع</Label>

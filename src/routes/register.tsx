@@ -55,7 +55,7 @@ function RegisterPage() {
             <CheckCircle2 className="mx-auto h-12 w-12 text-success" />
             <h2 className="mt-4 text-2xl">🟡 حسابك قيد المراجعة</h2>
             <ol className="mx-auto mt-5 max-w-md space-y-2 text-start text-sm leading-7 text-muted-foreground">
-              <li>1. اختر الباقة (7,000 دج سنويًا).</li>
+              <li>1. اختر الباقة (8,000 دج سنويًا).</li>
               <li>2. قم بالدفع عبر الحساب البريدي CCP.</li>
               <li>3. أرسل إثبات الدفع (صورة أو PDF).</li>
               <li>4. انتظر التفعيل بعد التحقق اليدوي من الإدارة خلال 24 ساعة.</li>

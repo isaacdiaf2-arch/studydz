@@ -1,4 +1,4 @@
-export const CONTRACT_AMOUNT = 7000;
+export const CONTRACT_AMOUNT = 8000;
 export const CONTRACT_MONTHS = 12;
 
 export type ContractStatus =

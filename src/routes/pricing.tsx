@@ -7,16 +7,16 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
-      { title: "الأسعار — اشتراك سنوي 7,000 دج | Study DZ" },
+      { title: "الأسعار — اشتراك سنوي 8,000 دج | Study DZ" },
       {
         name: "description",
         content:
-          "الباقة الأساسية من Study DZ: أساتذة وطلاب وأقسام غير محدودة، دروس وملفات واختبارات، باشتراك سنوي 7,000 دج.",
+          "الباقة الأساسية من Study DZ: أساتذة وطلاب وأقسام غير محدودة، دروس وملفات واختبارات، باشتراك سنوي 8,000 دج.",
       },
-      { property: "og:title", content: "الأسعار — اشتراك سنوي 7,000 دج | Study DZ" },
+      { property: "og:title", content: "الأسعار — اشتراك سنوي 8,000 دج | Study DZ" },
       {
         property: "og:description",
-        content: "باقة واحدة بسيطة لكل المؤسسات التعليمية الجزائرية بسعر 7,000 دج سنويًا.",
+        content: "باقة واحدة بسيطة لكل المؤسسات التعليمية الجزائرية بسعر 8,000 دج سنويًا.",
       },
     ],
   }),
@@ -53,7 +53,7 @@ function Pricing() {
           <div className="surface-hero border-b border-border px-6 py-8 text-center sm:px-10">
             <p className="text-sm font-semibold text-muted-foreground">🟢 الباقة الأساسية</p>
             <p className="mt-3 font-display text-5xl font-extrabold text-foreground">
-              7,000 <span className="text-2xl">دج</span>
+              8,000 <span className="text-2xl">دج</span>
             </p>
             <p className="mt-1 text-sm text-muted-foreground">اشتراك سنوي لكل مؤسسة</p>
 

@@ -79,7 +79,7 @@ export const registerInstitution = createServerFn({ method: "POST" })
 
     await supabaseAdmin.from("contracts").insert({
       institution_id: institution.id,
-      body: "عقد اشتراك سنوي بين إدارة منصة Study DZ ومدير المؤسسة، مدته سنة كاملة بمبلغ 7,000 دج، يُجدَّد بعد الدفع والمراجعة.",
+      body: "عقد اشتراك سنوي بين إدارة منصة Study DZ ومدير المؤسسة، مدته سنة كاملة بمبلغ 8,000 دج، يُجدَّد بعد الدفع والمراجعة.",
     });
 
     return { institutionId: institution.id };
