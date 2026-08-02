@@ -229,12 +229,14 @@ function InstitutionDashboard() {
             onAdd={(v) => addMember.mutate(v)}
             onDelete={(id) => removeMember.mutate(id)}
           />
-          <TransferSection
-            students={students}
-            onTransfer={(studentId, targetInstitutionId) =>
-              transfer.mutate({ studentId, targetInstitutionId })
-            }
-          />
+          <div className="card-soft p-4 text-sm">
+            <p className="font-semibold">تحويل طالب إلى مؤسسة أخرى</p>
+            <p className="mt-1 text-muted-foreground">
+              لحماية بيانات المؤسسات، يتم تحويل الطلاب بين المؤسسات عبر إدارة المنصة فقط. أرسل طلب
+              التحويل من صفحة التواصل مع ذكر اسم الطالب والمؤسسة المستقبِلة.
+            </p>
+          </div>
+
         </div>
       )}
 
