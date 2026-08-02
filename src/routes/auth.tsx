@@ -2,12 +2,15 @@ import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-r
 import { useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { unlockPlatformAdmin } from "@/lib/auth.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { SiteHeader } from "@/components/site/SiteHeader";
+import { PENDING_UNLOCK_KEY } from "@/components/site/BrandLogo";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: z.object({ redirect: z.string().optional() }),
@@ -30,21 +33,53 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const navigate = useNavigate();
   const search = useSearch({ from: "/auth" });
+  const unlock = useServerFn(unlockPlatformAdmin);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError(null);
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (error) {
-      toast.error("تعذّر تسجيل الدخول: تحقّق من البريد وكلمة المرور.");
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+
+    if (signInError) {
+      setLoading(false);
+      const message =
+        signInError.message === "Invalid login credentials"
+          ? "البريد الإلكتروني أو كلمة المرور غير صحيحة."
+          : signInError.message === "Email not confirmed"
+            ? "لم يتم تأكيد البريد الإلكتروني بعد."
+            : `تعذّر تسجيل الدخول: ${signInError.message}`;
+      setError(message);
+      toast.error(message);
       return;
     }
-    navigate({ to: search.redirect === "/admin" ? "/dashboard" : (search.redirect ?? "/dashboard") });
+
+    // Apply a pending platform-admin unlock captured before sign-in.
+    let destination = search.redirect ?? "/dashboard";
+    const pending =
+      typeof window !== "undefined" ? sessionStorage.getItem(PENDING_UNLOCK_KEY) : null;
+    if (pending) {
+      sessionStorage.removeItem(PENDING_UNLOCK_KEY);
+      try {
+        await unlock({ data: { code: pending } });
+        toast.success("تم تفعيل صلاحية مدير المنصة.");
+        destination = "/admin";
+      } catch {
+        toast.error("رمز الدخول المحجوز غير صحيح.");
+      }
+    }
+
+    setLoading(false);
+    navigate({ to: destination });
   }
+
 
 
   return (
@@ -77,10 +112,16 @@ function AuthPage() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
+          {error && (
+            <p role="alert" className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {error}
+            </p>
+          )}
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "جارٍ الدخول…" : "دخول"}
           </Button>
         </form>
+
 
         <p className="mt-4 text-center text-sm">
           <Link to="/forgot-password" className="font-semibold text-foreground underline">
