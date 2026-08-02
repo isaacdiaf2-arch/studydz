@@ -33,8 +33,6 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const unlock = useServerFn(unlockPlatformAdmin);
-  const queryClient = useQueryClient();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -45,21 +43,9 @@ function AuthPage() {
       toast.error("تعذّر تسجيل الدخول: تحقّق من البريد وكلمة المرور.");
       return;
     }
-    const pending = sessionStorage.getItem("sdz_pending_unlock");
-    if (pending) {
-      sessionStorage.removeItem("sdz_pending_unlock");
-      try {
-        await unlock({ data: { code: pending } });
-        await queryClient.invalidateQueries({ queryKey: ["account"] });
-        toast.success("تم فتح لوحة مدير المنصة.");
-        navigate({ to: "/admin" });
-        return;
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : "تعذّر فتح لوحة مدير المنصة.");
-      }
-    }
     navigate({ to: search.redirect === "/admin" ? "/dashboard" : (search.redirect ?? "/dashboard") });
   }
+
 
   return (
     <div className="min-h-screen">
