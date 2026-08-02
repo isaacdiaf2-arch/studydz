@@ -1096,35 +1096,7 @@ export type Database = {
       }
     }
     Views: {
-      institution_directory: {
-        Row: {
-          first_name: string | null
-          id: string | null
-          institution_id: string | null
-          last_name: string | null
-        }
-        Insert: {
-          first_name?: string | null
-          id?: string | null
-          institution_id?: string | null
-          last_name?: string | null
-        }
-        Update: {
-          first_name?: string | null
-          id?: string | null
-          institution_id?: string | null
-          last_name?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_institution_id_fkey"
-            columns: ["institution_id"]
-            isOneToOne: false
-            referencedRelation: "institutions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       current_institution: { Args: never; Returns: string }
