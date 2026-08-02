@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { listInstitutionDirectory } from "@/lib/directory.functions";
 import { cacheSchedules, readCachedSchedules, type ScheduleRow } from "@/lib/schedule";
+
 
 /**
  * جدول العضو (أستاذ أو طالب) مع دعم وضع عدم الاتصال 24 ساعة (للعرض فقط).
