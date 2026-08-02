@@ -112,10 +112,16 @@ function AuthPage() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
+          {error && (
+            <p role="alert" className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {error}
+            </p>
+          )}
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "جارٍ الدخول…" : "دخول"}
           </Button>
         </form>
+
 
         <p className="mt-4 text-center text-sm">
           <Link to="/forgot-password" className="font-semibold text-foreground underline">
