@@ -25,7 +25,7 @@ import { DashboardShell, StatCard, EmptyState } from "@/components/dashboard/Das
 import { SignaturePad } from "@/components/dashboard/SignaturePad";
 import { useAccount } from "@/lib/account";
 import { SchedulesManager } from "@/components/dashboard/SchedulesManager";
-import { createMember, deleteMember, transferStudent } from "@/lib/platform.functions";
+import { createMember, deleteMember } from "@/lib/platform.functions";
 
 export const Route = createFileRoute("/_authenticated/institution")({
   component: InstitutionDashboard,
@@ -143,7 +143,6 @@ function InstitutionDashboard() {
 
   const createMemberFn = useServerFn(createMember);
   const deleteMemberFn = useServerFn(deleteMember);
-  const transferFn = useServerFn(transferStudent);
 
   const addMember = useMutation({
     mutationFn: (vars: Parameters<typeof createMember>[0] extends never ? never : Record<string, unknown>) =>
@@ -159,16 +158,6 @@ function InstitutionDashboard() {
     mutationFn: (userId: string) => deleteMemberFn({ data: { userId } }),
     onSuccess: () => {
       toast.success("تم حذف الحساب.");
-      invalidate();
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const transfer = useMutation({
-    mutationFn: (vars: { studentId: string; targetInstitutionId: string }) =>
-      transferFn({ data: vars }),
-    onSuccess: () => {
-      toast.success("تم تحويل الطالب.");
       invalidate();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -229,12 +218,14 @@ function InstitutionDashboard() {
             onAdd={(v) => addMember.mutate(v)}
             onDelete={(id) => removeMember.mutate(id)}
           />
-          <TransferSection
-            students={students}
-            onTransfer={(studentId, targetInstitutionId) =>
-              transfer.mutate({ studentId, targetInstitutionId })
-            }
-          />
+          <div className="card-soft p-4 text-sm">
+            <p className="font-semibold">تحويل طالب إلى مؤسسة أخرى</p>
+            <p className="mt-1 text-muted-foreground">
+              لحماية بيانات المؤسسات، يتم تحويل الطلاب بين المؤسسات عبر إدارة المنصة فقط. أرسل طلب
+              التحويل من صفحة التواصل مع ذكر اسم الطالب والمؤسسة المستقبِلة.
+            </p>
+          </div>
+
         </div>
       )}
 
@@ -427,55 +418,6 @@ function MemberSection({
         ))}
       </div>
     </div>
-  );
-}
-
-function TransferSection({
-  students,
-  onTransfer,
-}: {
-  students: Member[];
-  onTransfer: (studentId: string, targetInstitutionId: string) => void;
-}) {
-  const [studentId, setStudentId] = useState("");
-  const [target, setTarget] = useState("");
-  return (
-    <form
-      className="card-soft space-y-4 p-4"
-      onSubmit={(e) => {
-        e.preventDefault();
-        onTransfer(studentId, target);
-      }}
-    >
-      <h2 className="text-lg">تحويل طالب إلى مؤسسة أخرى</h2>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div className="grid gap-2">
-          <Label>الطالب</Label>
-          <select
-            required
-            className="h-10 rounded-md border border-input bg-background px-3 text-sm"
-            value={studentId}
-            onChange={(e) => setStudentId(e.target.value)}
-          >
-            <option value="">اختر الطالب</option>
-            {students.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.first_name} {s.last_name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <Field
-          label="معرّف المؤسسة الجديدة"
-          value={target}
-          onChange={setTarget}
-          required
-        />
-      </div>
-      <Button type="submit" variant="outline">
-        تحويل
-      </Button>
-    </form>
   );
 }
 

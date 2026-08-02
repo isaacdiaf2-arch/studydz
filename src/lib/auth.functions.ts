@@ -2,19 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-export const unlockPlatformAdmin = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) => z.object({ code: z.string().min(1).max(64) }).parse(data))
-  .handler(async ({ data, context }) => {
-    const expected = process.env.PLATFORM_UNLOCK_CODE ?? "getup";
-    if (data.code.trim() !== expected) throw new Error("كلمة المرور غير صحيحة.");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
-      .from("user_roles")
-      .upsert({ user_id: context.userId, role: "platform_admin" }, { onConflict: "user_id,role" });
-    if (error) throw new Error(error.message);
-    return { ok: true as const };
-  });
+// NOTE: the self-service "unlock platform admin" endpoint was removed for security.
+// Platform administrators are provisioned out-of-band only (see bootstrapRole).
+
 
 /** Public: a user who forgot their password sends a request to the responsible admin. */
 export const requestPasswordReset = createServerFn({ method: "POST" })

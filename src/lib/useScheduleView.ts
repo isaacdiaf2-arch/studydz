@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { listInstitutionDirectory } from "@/lib/directory.functions";
 import { cacheSchedules, readCachedSchedules, type ScheduleRow } from "@/lib/schedule";
+
 
 /**
  * جدول العضو (أستاذ أو طالب) مع دعم وضع عدم الاتصال 24 ساعة (للعرض فقط).
@@ -37,18 +40,13 @@ export function useScheduleView(params: {
     },
   });
 
+  const directoryFn = useServerFn(listInstitutionDirectory);
   const teachersQuery = useQuery({
     queryKey: ["schedule-view", "teachers", institutionId],
     enabled: !!institutionId,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, first_name, last_name")
-        .eq("institution_id", institutionId!);
-      if (error) throw error;
-      return data;
-    },
+    queryFn: async () => await directoryFn(),
   });
+
 
   useEffect(() => {
     if (query.isError && !fallback) {
@@ -63,7 +61,11 @@ export function useScheduleView(params: {
   const teacherNames = useMemo(
     () =>
       Object.fromEntries(
-        (teachersQuery.data ?? []).map((t) => [t.id, `${t.first_name} ${t.last_name}`]),
+        (teachersQuery.data ?? []).map((t: { id: string; first_name: string; last_name: string }) => [
+          t.id,
+          `${t.first_name} ${t.last_name}`,
+        ]),
+
       ) as Record<string, string>,
     [teachersQuery.data],
   );
