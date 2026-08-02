@@ -37,18 +37,13 @@ export function useScheduleView(params: {
     },
   });
 
+  const directoryFn = useServerFn(listInstitutionDirectory);
   const teachersQuery = useQuery({
     queryKey: ["schedule-view", "teachers", institutionId],
     enabled: !!institutionId,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, first_name, last_name")
-        .eq("institution_id", institutionId!);
-      if (error) throw error;
-      return data;
-    },
+    queryFn: async () => await directoryFn(),
   });
+
 
   useEffect(() => {
     if (query.isError && !fallback) {
