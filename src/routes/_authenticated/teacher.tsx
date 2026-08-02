@@ -90,7 +90,7 @@ function TeacherDashboard() {
       const ids = (exams.data ?? []).map((e) => e.id);
       const { data, error } = await supabase
         .from("attempts")
-        .select("*, exams(title), profiles:student_id(first_name, last_name)")
+        .select("*, exams(title)")
         .in("exam_id", ids);
       if (error) throw error;
       return data;
@@ -409,7 +409,7 @@ function TeacherDashboard() {
         <div className="space-y-2">
           {(attempts.data ?? []).length === 0 && <EmptyState text="لا توجد نتائج بعد." />}
           {(attempts.data ?? []).map((a) => {
-            const student = a.profiles as unknown as { first_name: string; last_name: string } | null;
+            const studentName = schedule.teacherNames[a.student_id as string] ?? "طالب";
             return (
               <div key={a.id} className="card-soft flex flex-wrap items-center gap-2 p-3 text-sm">
                 <span className="font-semibold">
