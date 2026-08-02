@@ -413,7 +413,7 @@ function TeacherDashboard() {
             return (
               <div key={a.id} className="card-soft flex flex-wrap items-center gap-2 p-3 text-sm">
                 <span className="font-semibold">
-                  {student?.first_name} {student?.last_name}
+                  {studentName}
                 </span>
                 <span className="text-xs text-muted-foreground">
                   {(a.exams as { title: string } | null)?.title}
