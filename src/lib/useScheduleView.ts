@@ -61,7 +61,11 @@ export function useScheduleView(params: {
   const teacherNames = useMemo(
     () =>
       Object.fromEntries(
-        (teachersQuery.data ?? []).map((t) => [t.id, `${t.first_name} ${t.last_name}`]),
+        (teachersQuery.data ?? []).map((t: { id: string; first_name: string; last_name: string }) => [
+          t.id,
+          `${t.first_name} ${t.last_name}`,
+        ]),
+
       ) as Record<string, string>,
     [teachersQuery.data],
   );
