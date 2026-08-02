@@ -198,6 +198,10 @@ export const deleteMember = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/**
+ * Cross-tenant student transfers are centrally reviewed: platform admins only.
+ * The destination institution must exist and be active.
+ */
 export const transferStudent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) =>
@@ -205,20 +209,30 @@ export const transferStudent = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: adminRole } = await context.supabase
+
+    const { data: isPlatformAdmin } = await context.supabase
       .from("user_roles")
-      .select("institution_id")
+      .select("id")
       .eq("user_id", context.userId)
-      .eq("role", "institution_admin")
+      .eq("role", "platform_admin")
       .maybeSingle();
-    if (!adminRole?.institution_id) throw new Error("غير مسموح.");
+    if (!isPlatformAdmin) throw new Error("غير مسموح: تحويل الطلاب بين المؤسسات لمدير المنصة فقط.");
 
     const { data: target } = await supabaseAdmin
+      .from("institutions")
+      .select("id, status")
+      .eq("id", data.targetInstitutionId)
+      .maybeSingle();
+    if (!target) throw new Error("المؤسسة المستقبِلة غير موجودة.");
+    if (target.status !== "active") throw new Error("المؤسسة المستقبِلة غير نشطة.");
+
+    const { data: student } = await supabaseAdmin
       .from("profiles")
       .select("institution_id")
       .eq("id", data.studentId)
       .maybeSingle();
-    if (target?.institution_id !== adminRole.institution_id) throw new Error("غير مسموح.");
+    if (!student) throw new Error("الطالب غير موجود.");
+    if (student.institution_id === data.targetInstitutionId) return { ok: true };
 
     await supabaseAdmin.from("enrollments").delete().eq("student_id", data.studentId);
     await supabaseAdmin
@@ -231,6 +245,7 @@ export const transferStudent = createServerFn({ method: "POST" })
       .eq("user_id", data.studentId);
     return { ok: true };
   });
+
 
 const supportSchema = z.object({
   firstName: z.string().min(1),
