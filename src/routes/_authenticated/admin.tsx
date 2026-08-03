@@ -331,11 +331,61 @@ function AdminDashboard() {
     (c) => contractFilter === "all" || c.status === contractFilter,
   );
 
+  const trials = useQuery({
+    queryKey: ["admin", "trials"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("trial_requests")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+  const trialList = trials.data ?? [];
+
+  const pendingAlerts =
+    pays.filter((p) => p.status === "pending").length +
+    contractList.filter((c) => c.status === "awaiting_platform").length +
+    trialList.filter((t) => t.status === "pending").length +
+    (resets.data ?? []).filter((r) => r.status === "pending").length;
+
   return (
-    <DashboardShell title="لوحة مدير المنصة" nav={nav} active={tab} onChange={setTab}>
+    <DashboardShell
+      title="لوحة مدير المنصة"
+      nav={nav}
+      active={tab}
+      onChange={setTab}
+      notifications={pendingAlerts}
+    >
       {tab === "home" && (
         <div className="space-y-4">
+          <section className="card-soft p-4">
+            <h2 className="mb-3 text-base">⚡ إجراءات سريعة</h2>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+              <QuickAction label="إضافة مؤسسة" icon={Building2} tone="brand" onClick={() => setTab("institutions")} />
+              <QuickAction label="مراجعة المدفوعات" icon={CreditCard} tone="info" onClick={() => setTab("payments")} />
+              <QuickAction label="اعتماد العقود" icon={FileSignature} tone="success" onClick={() => setTab("contracts")} />
+              <QuickAction label="طلبات التجربة" icon={Rocket} tone="warning" onClick={() => setTab("trials")} />
+              <QuickAction label="كلمات المرور" icon={KeyRound} tone="destructive" onClick={() => setTab("resets")} />
+              <QuickAction label="تصدير التقارير" icon={Download} tone="brand" onClick={() => setTab("reports")} />
+            </div>
+          </section>
+
+          <section>
+            <h2 className="mb-3 text-base">🗂️ وحدات الإدارة</h2>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <ModuleCard title="المؤسسات" description="اعتماد وتعليق وإدارة المؤسسات" icon={Building2} count={list.length} onClick={() => setTab("institutions")} />
+              <ModuleCard title="المستخدمون" description="المديرون والأساتذة والطلاب" icon={Users} count={profileList.length} onClick={() => setTab("users")} />
+              <ModuleCard title="الاشتراكات" description="متابعة تواريخ التجديد والانتهاء" icon={CalendarClock} count={list.filter((i) => i.subscription_end).length} onClick={() => setTab("subscriptions")} />
+              <ModuleCard title="المدفوعات" description="وصولات CCP والتحقق اليدوي" icon={CreditCard} count={pays.length} onClick={() => setTab("payments")} />
+              <ModuleCard title="العقود" description="الإمضاء الإلكتروني والاعتماد" icon={FileSignature} count={contractList.length} onClick={() => setTab("contracts")} />
+              <ModuleCard title="طلبات التجربة" description="تجربة مجانية لمدة 24 ساعة" icon={Rocket} count={trialList.length} onClick={() => setTab("trials")} />
+            </div>
+          </section>
+
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+
             <StatCard label="إجمالي المؤسسات" value={list.length} icon={Building2} />
             <StatCard
               label="المؤسسات النشطة"
