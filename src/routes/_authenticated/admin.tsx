@@ -344,6 +344,18 @@ function AdminDashboard() {
   });
   const trialList = trials.data ?? [];
 
+  const decideTrial = useServerFn(decideTrialRequest);
+  const trialDecision = useMutation({
+    mutationFn: (vars: { id: string; approve: boolean }) => decideTrial({ data: vars }),
+    onSuccess: (_r, vars) => {
+      toast.success(vars.approve ? "تم تفعيل التجربة لمدة 24 ساعة" : "تم رفض الطلب");
+      void queryClient.invalidateQueries({ queryKey: ["admin", "trials"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+
+
   const pendingAlerts =
     pays.filter((p) => p.status === "pending").length +
     contractList.filter((c) => c.status === "awaiting_platform").length +
