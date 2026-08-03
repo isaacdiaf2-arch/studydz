@@ -30,7 +30,14 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { DashboardShell, StatCard, EmptyState } from "@/components/dashboard/DashboardShell";
+import {
+  DashboardShell,
+  StatCard,
+  EmptyState,
+  QuickAction,
+  ModuleCard,
+} from "@/components/dashboard/DashboardShell";
+
 import { reviewPayment, setInstitutionStatus } from "@/lib/platform.functions";
 import { signContractAsPlatform, setContractStatus } from "@/lib/contracts.functions";
 import { CONTRACT_STATUS_LABEL, type ContractStatus } from "@/lib/contracts.shared";
