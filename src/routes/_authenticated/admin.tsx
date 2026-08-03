@@ -42,6 +42,8 @@ import { reviewPayment, setInstitutionStatus } from "@/lib/platform.functions";
 import { signContractAsPlatform, setContractStatus } from "@/lib/contracts.functions";
 import { CONTRACT_STATUS_LABEL, type ContractStatus } from "@/lib/contracts.shared";
 import { resolvePasswordReset } from "@/lib/auth.functions";
+import { decideTrialRequest } from "@/lib/inbound.functions";
+
 import { SignatureSheet } from "@/components/dashboard/SignatureSheet";
 
 export const Route = createFileRoute("/_authenticated/admin")({
