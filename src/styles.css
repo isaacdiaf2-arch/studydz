@@ -93,7 +93,18 @@
   --success-foreground: oklch(0.99 0 0);
   --warning: oklch(0.75 0.14 78);
   --warning-foreground: oklch(0.24 0.04 60);
+  --brand: oklch(0.52 0.21 292);
+  --brand-foreground: oklch(0.99 0 0);
+  --brand-soft: oklch(0.96 0.03 292);
+  --info: oklch(0.55 0.18 255);
+  --info-foreground: oklch(0.99 0 0);
+  --info-soft: oklch(0.96 0.03 255);
+  --success-soft: oklch(0.96 0.04 155);
+  --warning-soft: oklch(0.97 0.05 85);
+  --destructive-soft: oklch(0.96 0.03 27);
+  --canvas: oklch(0.975 0.004 280);
   --border: oklch(0.92 0 0);
+
   --input: oklch(0.92 0 0);
   --ring: oklch(0.16 0 0);
   --chart-1: oklch(0.16 0 0);
