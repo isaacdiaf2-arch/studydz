@@ -43,11 +43,13 @@ const nav = [
   { key: "payments", label: "المدفوعات", icon: CreditCard },
   { key: "contracts", label: "العقود", icon: FileSignature },
   { key: "users", label: "المستخدمون", icon: Users },
+  { key: "trials", label: "طلبات التجربة", icon: Rocket },
   { key: "resets", label: "طلبات كلمة المرور", icon: KeyRound },
   { key: "reports", label: "التقارير", icon: Download },
   { key: "activity", label: "سجل العمليات", icon: Activity },
   { key: "support", label: "الدعم", icon: LifeBuoy },
 ];
+
 
 const statusLabels: Record<string, string> = {
   pending: "🟡 قيد المراجعة",
