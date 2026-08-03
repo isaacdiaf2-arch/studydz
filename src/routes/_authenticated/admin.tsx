@@ -479,8 +479,69 @@ function AdminDashboard() {
 
             ))}
           </div>
+
+          <h2 className="pt-2 text-lg">🛠️ أدوات النظام</h2>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <ModuleCard title="سجل العمليات" description="تتبع كل تغييرات المنصة" icon={Activity} onClick={() => setTab("activity")} />
+            <ModuleCard title="التقارير والتصدير" description="تصدير البيانات بصيغة CSV" icon={Database} onClick={() => setTab("reports")} />
+            <ModuleCard title="الدعم والرسائل" description="رسائل التواصل الواردة" icon={Mail} onClick={() => setTab("support")} />
+          </div>
+
+          <div className="card-soft flex items-start gap-3 p-4">
+            <ShieldCheck className="h-5 w-5 shrink-0 text-success" />
+            <p className="text-xs text-muted-foreground">
+              جميع البيانات معزولة لكل مؤسسة عبر سياسات أمان على مستوى الصفوف، ولا يمكن لأي مؤسسة
+              الاطلاع على بيانات مؤسسة أخرى.
+            </p>
+          </div>
         </div>
       )}
+
+      {tab === "trials" && (
+        <div className="space-y-3">
+          <h2 className="text-lg">🚀 طلبات التجربة المجانية (24 ساعة)</h2>
+          {trialList.length === 0 && <EmptyState text="لا توجد طلبات تجربة." />}
+          {trialList.map((t) => (
+            <div key={t.id} className="card-soft space-y-2 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="font-display font-bold">{t.institution_name}</p>
+                <span className="rounded-full bg-secondary px-2 py-1 text-xs text-muted-foreground">
+                  {t.status === "pending" ? "🟡 جديد" : t.status === "approved" ? "🟢 مفعّل" : "🔴 مرفوض"}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {t.email} · {t.phone} · {new Date(t.created_at).toLocaleString("ar-DZ")}
+              </p>
+              <p className="whitespace-pre-wrap text-sm">{t.motivation}</p>
+              {t.trial_ends_at && (
+                <p className="text-xs text-muted-foreground">
+                  تنتهي التجربة: {new Date(t.trial_ends_at).toLocaleString("ar-DZ")}
+                </p>
+              )}
+              {t.status === "pending" && (
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() => trialDecision.mutate({ id: t.id, approve: true })}
+                    disabled={trialDecision.isPending}
+                  >
+                    قبول وتفعيل 24 ساعة
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => trialDecision.mutate({ id: t.id, approve: false })}
+                    disabled={trialDecision.isPending}
+                  >
+                    رفض
+                  </Button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
 
       {tab === "institutions" && (
         <div className="space-y-3">
