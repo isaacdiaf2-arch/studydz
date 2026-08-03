@@ -9,7 +9,9 @@ const links = [
   { to: "/features", label: "المميزات" },
   { to: "/pricing", label: "الأسعار" },
   { to: "/subscribe", label: "الاشتراك والدفع" },
+  { to: "/trial", label: "تجربة مجانية" },
   { to: "/contact", label: "التواصل والدعم" },
+
 ] as const;
 
 export function SiteHeader() {
