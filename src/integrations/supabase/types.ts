@@ -482,6 +482,7 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          is_trial: boolean
           logo_url: string | null
           name: string
           owner_id: string | null
@@ -489,6 +490,7 @@ export type Database = {
           primary_color: string | null
           status: Database["public"]["Enums"]["institution_status"]
           subscription_end: string | null
+          trial_ends_at: string | null
           type: string
           wilaya: string
         }
@@ -499,6 +501,7 @@ export type Database = {
           created_at?: string
           email: string
           id?: string
+          is_trial?: boolean
           logo_url?: string | null
           name: string
           owner_id?: string | null
@@ -506,6 +509,7 @@ export type Database = {
           primary_color?: string | null
           status?: Database["public"]["Enums"]["institution_status"]
           subscription_end?: string | null
+          trial_ends_at?: string | null
           type: string
           wilaya: string
         }
@@ -516,6 +520,7 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
+          is_trial?: boolean
           logo_url?: string | null
           name?: string
           owner_id?: string | null
@@ -523,6 +528,7 @@ export type Database = {
           primary_color?: string | null
           status?: Database["public"]["Enums"]["institution_status"]
           subscription_end?: string | null
+          trial_ends_at?: string | null
           type?: string
           wilaya?: string
         }
@@ -1062,6 +1068,48 @@ export type Database = {
         }
         Relationships: []
       }
+      trial_requests: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          institution_name: string
+          motivation: string
+          note: string | null
+          phone: string
+          status: string
+          trial_ends_at: string | null
+          trial_started_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          institution_name: string
+          motivation: string
+          note?: string | null
+          phone: string
+          status?: string
+          trial_ends_at?: string | null
+          trial_started_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          institution_name?: string
+          motivation?: string
+          note?: string | null
+          phone?: string
+          status?: string
+          trial_ends_at?: string | null
+          trial_started_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1105,6 +1153,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      institution_access_valid: {
+        Args: { _institution_id: string }
         Returns: boolean
       }
       is_institution_admin: { Args: never; Returns: boolean }

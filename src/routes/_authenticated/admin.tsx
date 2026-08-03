@@ -20,16 +20,30 @@ import {
   Download,
   AlertTriangle,
   Search,
+  Rocket,
+  Mail,
+  ShieldCheck,
+  Database,
 } from "lucide-react";
+
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { DashboardShell, StatCard, EmptyState } from "@/components/dashboard/DashboardShell";
+import {
+  DashboardShell,
+  StatCard,
+  EmptyState,
+  QuickAction,
+  ModuleCard,
+} from "@/components/dashboard/DashboardShell";
+
 import { reviewPayment, setInstitutionStatus } from "@/lib/platform.functions";
 import { signContractAsPlatform, setContractStatus } from "@/lib/contracts.functions";
 import { CONTRACT_STATUS_LABEL, type ContractStatus } from "@/lib/contracts.shared";
 import { resolvePasswordReset } from "@/lib/auth.functions";
+import { decideTrialRequest } from "@/lib/inbound.functions";
+
 import { SignatureSheet } from "@/components/dashboard/SignatureSheet";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -43,11 +57,13 @@ const nav = [
   { key: "payments", label: "المدفوعات", icon: CreditCard },
   { key: "contracts", label: "العقود", icon: FileSignature },
   { key: "users", label: "المستخدمون", icon: Users },
+  { key: "trials", label: "طلبات التجربة", icon: Rocket },
   { key: "resets", label: "طلبات كلمة المرور", icon: KeyRound },
   { key: "reports", label: "التقارير", icon: Download },
   { key: "activity", label: "سجل العمليات", icon: Activity },
   { key: "support", label: "الدعم", icon: LifeBuoy },
 ];
+
 
 const statusLabels: Record<string, string> = {
   pending: "🟡 قيد المراجعة",
@@ -317,11 +333,73 @@ function AdminDashboard() {
     (c) => contractFilter === "all" || c.status === contractFilter,
   );
 
+  const trials = useQuery({
+    queryKey: ["admin", "trials"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("trial_requests")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+  const trialList = trials.data ?? [];
+
+  const decideTrial = useServerFn(decideTrialRequest);
+  const trialDecision = useMutation({
+    mutationFn: (vars: { id: string; approve: boolean }) => decideTrial({ data: vars }),
+    onSuccess: (_r, vars) => {
+      toast.success(vars.approve ? "تم تفعيل التجربة لمدة 24 ساعة" : "تم رفض الطلب");
+      void queryClient.invalidateQueries({ queryKey: ["admin", "trials"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+
+
+  const pendingAlerts =
+    pays.filter((p) => p.status === "pending").length +
+    contractList.filter((c) => c.status === "awaiting_platform").length +
+    trialList.filter((t) => t.status === "pending").length +
+    (resets.data ?? []).filter((r) => r.status === "pending").length;
+
   return (
-    <DashboardShell title="لوحة مدير المنصة" nav={nav} active={tab} onChange={setTab}>
+    <DashboardShell
+      title="لوحة مدير المنصة"
+      nav={nav}
+      active={tab}
+      onChange={setTab}
+      notifications={pendingAlerts}
+    >
       {tab === "home" && (
         <div className="space-y-4">
+          <section className="card-soft p-4">
+            <h2 className="mb-3 text-base">⚡ إجراءات سريعة</h2>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+              <QuickAction label="إضافة مؤسسة" icon={Building2} tone="brand" onClick={() => setTab("institutions")} />
+              <QuickAction label="مراجعة المدفوعات" icon={CreditCard} tone="info" onClick={() => setTab("payments")} />
+              <QuickAction label="اعتماد العقود" icon={FileSignature} tone="success" onClick={() => setTab("contracts")} />
+              <QuickAction label="طلبات التجربة" icon={Rocket} tone="warning" onClick={() => setTab("trials")} />
+              <QuickAction label="كلمات المرور" icon={KeyRound} tone="destructive" onClick={() => setTab("resets")} />
+              <QuickAction label="تصدير التقارير" icon={Download} tone="brand" onClick={() => setTab("reports")} />
+            </div>
+          </section>
+
+          <section>
+            <h2 className="mb-3 text-base">🗂️ وحدات الإدارة</h2>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <ModuleCard title="المؤسسات" description="اعتماد وتعليق وإدارة المؤسسات" icon={Building2} count={list.length} onClick={() => setTab("institutions")} />
+              <ModuleCard title="المستخدمون" description="المديرون والأساتذة والطلاب" icon={Users} count={profileList.length} onClick={() => setTab("users")} />
+              <ModuleCard title="الاشتراكات" description="متابعة تواريخ التجديد والانتهاء" icon={CalendarClock} count={list.filter((i) => i.subscription_end).length} onClick={() => setTab("subscriptions")} />
+              <ModuleCard title="المدفوعات" description="وصولات CCP والتحقق اليدوي" icon={CreditCard} count={pays.length} onClick={() => setTab("payments")} />
+              <ModuleCard title="العقود" description="الإمضاء الإلكتروني والاعتماد" icon={FileSignature} count={contractList.length} onClick={() => setTab("contracts")} />
+              <ModuleCard title="طلبات التجربة" description="تجربة مجانية لمدة 24 ساعة" icon={Rocket} count={trialList.length} onClick={() => setTab("trials")} />
+            </div>
+          </section>
+
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+
             <StatCard label="إجمالي المؤسسات" value={list.length} icon={Building2} />
             <StatCard
               label="المؤسسات النشطة"
@@ -415,8 +493,69 @@ function AdminDashboard() {
 
             ))}
           </div>
+
+          <h2 className="pt-2 text-lg">🛠️ أدوات النظام</h2>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <ModuleCard title="سجل العمليات" description="تتبع كل تغييرات المنصة" icon={Activity} onClick={() => setTab("activity")} />
+            <ModuleCard title="التقارير والتصدير" description="تصدير البيانات بصيغة CSV" icon={Database} onClick={() => setTab("reports")} />
+            <ModuleCard title="الدعم والرسائل" description="رسائل التواصل الواردة" icon={Mail} onClick={() => setTab("support")} />
+          </div>
+
+          <div className="card-soft flex items-start gap-3 p-4">
+            <ShieldCheck className="h-5 w-5 shrink-0 text-success" />
+            <p className="text-xs text-muted-foreground">
+              جميع البيانات معزولة لكل مؤسسة عبر سياسات أمان على مستوى الصفوف، ولا يمكن لأي مؤسسة
+              الاطلاع على بيانات مؤسسة أخرى.
+            </p>
+          </div>
         </div>
       )}
+
+      {tab === "trials" && (
+        <div className="space-y-3">
+          <h2 className="text-lg">🚀 طلبات التجربة المجانية (24 ساعة)</h2>
+          {trialList.length === 0 && <EmptyState text="لا توجد طلبات تجربة." />}
+          {trialList.map((t) => (
+            <div key={t.id} className="card-soft space-y-2 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="font-display font-bold">{t.institution_name}</p>
+                <span className="rounded-full bg-secondary px-2 py-1 text-xs text-muted-foreground">
+                  {t.status === "pending" ? "🟡 جديد" : t.status === "approved" ? "🟢 مفعّل" : "🔴 مرفوض"}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {t.email} · {t.phone} · {new Date(t.created_at).toLocaleString("ar-DZ")}
+              </p>
+              <p className="whitespace-pre-wrap text-sm">{t.motivation}</p>
+              {t.trial_ends_at && (
+                <p className="text-xs text-muted-foreground">
+                  تنتهي التجربة: {new Date(t.trial_ends_at).toLocaleString("ar-DZ")}
+                </p>
+              )}
+              {t.status === "pending" && (
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() => trialDecision.mutate({ id: t.id, approve: true })}
+                    disabled={trialDecision.isPending}
+                  >
+                    قبول وتفعيل 24 ساعة
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => trialDecision.mutate({ id: t.id, approve: false })}
+                    disabled={trialDecision.isPending}
+                  >
+                    رفض
+                  </Button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
 
       {tab === "institutions" && (
         <div className="space-y-3">
