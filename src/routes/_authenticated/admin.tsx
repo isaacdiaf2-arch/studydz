@@ -20,7 +20,12 @@ import {
   Download,
   AlertTriangle,
   Search,
+  Rocket,
+  Mail,
+  ShieldCheck,
+  Database,
 } from "lucide-react";
+
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
