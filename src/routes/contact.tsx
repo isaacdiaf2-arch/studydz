@@ -1,12 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Mail, Phone, Send, CheckCircle2 } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { Mail, Phone, Send, CheckCircle2, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
+import { submitSupportMessage } from "@/lib/inbound.functions";
+import { supportMessageSchema } from "@/lib/inbound.shared";
 
 import { SUPPORT_EMAIL, SUPPORT_PHONE, GMAIL_COMPOSE, WHATSAPP_LINK } from "@/components/site/SiteFooter";
 
@@ -31,32 +36,49 @@ export const Route = createFileRoute("/contact")({
 
 function Contact() {
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const send = useServerFn(submitSupportMessage);
+
+  const mutation = useMutation({
+    mutationFn: send,
+    onSuccess: (result) => {
+      if (!result.ok) {
+        setError(result.message);
+        toast.error(result.message);
+        return;
+      }
+      setError(null);
+      setSent(true);
+      toast.success("تم استلام رسالتك بنجاح");
+    },
+    onError: (e: Error) => {
+      setError(e.message);
+      toast.error("تعذّر إرسال الرسالة");
+    },
+  });
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
     const get = (k: string) => String(f.get(k) ?? "").trim();
-    const body = [
-      `الاسم: ${get("firstName")}`,
-      `اللقب: ${get("lastName")}`,
-      `اسم المؤسسة: ${get("institution")}`,
-      `الولاية: ${get("wilaya")}`,
-      `البلدية: ${get("commune")}`,
-      `عنوان المؤسسة: ${get("address")}`,
-      `أرقام الهاتف: ${get("phones")}`,
-      `البريد الإلكتروني: ${get("email")}`,
-      "",
-      "الرسالة:",
-      get("message"),
-    ].join("\n");
-
-    const subject = `طلب تواصل من ${get("institution") || "مؤسسة"} — Study DZ`;
-    window.open(
-      `${GMAIL_COMPOSE}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
-      "_blank",
-      "noopener",
-    );
-    setSent(true);
+    const parsed = supportMessageSchema.safeParse({
+      firstName: get("firstName"),
+      lastName: get("lastName"),
+      institutionName: get("institution"),
+      wilaya: get("wilaya"),
+      commune: get("commune"),
+      address: get("address"),
+      phone: get("phones"),
+      email: get("email"),
+      message: get("message"),
+    });
+    if (!parsed.success) {
+      const msg = parsed.error.issues[0]?.message ?? "تحقق من البيانات المدخلة";
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
+    mutation.mutate({ data: parsed.data });
   }
 
   return (
@@ -65,7 +87,7 @@ function Contact() {
       <main className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
         <h1 className="text-4xl">التواصل والدعم</h1>
         <p className="mt-3 text-muted-foreground">
-          املأ المعلومات التالية وسيتم إرسالها إلى فريق الدعم على البريد{" "}
+          املأ المعلومات التالية وسيتم إرسالها مباشرة إلى فريق الدعم على البريد{" "}
           <span dir="ltr" className="font-semibold text-foreground">
             {SUPPORT_EMAIL}
           </span>
@@ -75,9 +97,10 @@ function Contact() {
         {sent ? (
           <div className="card-soft mt-8 p-8 text-center">
             <CheckCircle2 className="mx-auto h-12 w-12 text-success" />
-            <h2 className="mt-4 text-2xl">تم تجهيز رسالتك</h2>
+            <h2 className="mt-4 text-2xl">تم استلام رسالتك</h2>
             <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-muted-foreground">
-              إن لم يفتح برنامج البريد تلقائيًا، يمكنك مراسلتنا مباشرة على{" "}
+              وصلت رسالتك إلى فريق الدعم وسيتم الرد عليك على بريدك الإلكتروني. للاستعجال يمكنك
+              مراسلتنا على{" "}
               <a className="font-semibold text-primary" href={GMAIL_COMPOSE} target="_blank" rel="noreferrer" dir="ltr">
                 {SUPPORT_EMAIL}
               </a>
@@ -100,19 +123,29 @@ function Contact() {
               <div className="sm:col-span-2">
                 <TextField name="address" label="عنوان المؤسسة" required />
               </div>
-              <TextField name="phones" label="أرقام الهاتف" type="tel" dir="ltr" required />
+              <TextField name="phones" label="رقم الهاتف" type="tel" dir="ltr" required />
               <TextField name="email" label="البريد الإلكتروني" type="email" dir="ltr" required />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="message">رسالتك</Label>
-              <Textarea id="message" name="message" rows={5} maxLength={1000} required />
+              <Textarea id="message" name="message" rows={5} maxLength={2000} required />
             </div>
-            <Button type="submit" size="lg" className="w-full">
-              <Send className="h-4 w-4" />
+            {error && (
+              <p className="rounded-lg bg-destructive-soft px-3 py-2 text-sm text-destructive">
+                {error}
+              </p>
+            )}
+            <Button type="submit" size="lg" className="w-full" disabled={mutation.isPending}>
+              {mutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
               إرسال الرسالة
             </Button>
           </form>
         )}
+
 
         <div className="card-soft mt-8 flex flex-wrap items-center gap-4 p-5 text-sm">
           <a
