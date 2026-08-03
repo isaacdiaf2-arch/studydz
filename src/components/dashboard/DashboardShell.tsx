@@ -97,7 +97,7 @@ export function DashboardShell({
   const sidebar = (
     <div className="flex h-full flex-col gap-1 overflow-y-auto p-3">
       <Link to="/" className="mb-3 flex items-center gap-2 rounded-xl px-2 py-2">
-        <img src={logo} alt="شعار Study DZ" className="h-9 w-9 rounded-full object-contain" />
+        <img src={logo.url} alt="شعار Study DZ" className="h-9 w-9 rounded-full object-contain" />
         <span className="min-w-0">
           <span className="block font-display text-base font-extrabold leading-tight">Study DZ</span>
           <span className="block truncate text-[11px] text-muted-foreground">{title}</span>
