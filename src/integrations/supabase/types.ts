@@ -476,15 +476,23 @@ export type Database = {
       }
       institutions: {
         Row: {
+          accreditation_authority: string | null
+          accreditation_number: string | null
           address: string | null
           commercial_register: string | null
           commune: string
+          cover_url: string | null
           created_at: string
           email: string
+          facebook_url: string | null
+          founded_on: string | null
           id: string
+          instagram_url: string | null
           is_trial: boolean
           logo_url: string | null
+          maps_url: string | null
           name: string
+          name_fr: string | null
           owner_id: string | null
           phone: string
           primary_color: string | null
@@ -492,18 +500,27 @@ export type Database = {
           subscription_end: string | null
           trial_ends_at: string | null
           type: string
+          website: string | null
           wilaya: string
         }
         Insert: {
+          accreditation_authority?: string | null
+          accreditation_number?: string | null
           address?: string | null
           commercial_register?: string | null
           commune: string
+          cover_url?: string | null
           created_at?: string
           email: string
+          facebook_url?: string | null
+          founded_on?: string | null
           id?: string
+          instagram_url?: string | null
           is_trial?: boolean
           logo_url?: string | null
+          maps_url?: string | null
           name: string
+          name_fr?: string | null
           owner_id?: string | null
           phone: string
           primary_color?: string | null
@@ -511,18 +528,27 @@ export type Database = {
           subscription_end?: string | null
           trial_ends_at?: string | null
           type: string
+          website?: string | null
           wilaya: string
         }
         Update: {
+          accreditation_authority?: string | null
+          accreditation_number?: string | null
           address?: string | null
           commercial_register?: string | null
           commune?: string
+          cover_url?: string | null
           created_at?: string
           email?: string
+          facebook_url?: string | null
+          founded_on?: string | null
           id?: string
+          instagram_url?: string | null
           is_trial?: boolean
           logo_url?: string | null
+          maps_url?: string | null
           name?: string
+          name_fr?: string | null
           owner_id?: string | null
           phone?: string
           primary_color?: string | null
@@ -530,6 +556,7 @@ export type Database = {
           subscription_end?: string | null
           trial_ends_at?: string | null
           type?: string
+          website?: string | null
           wilaya?: string
         }
         Relationships: []
