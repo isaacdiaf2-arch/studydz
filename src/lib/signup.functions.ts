@@ -124,9 +124,9 @@ export const saveInstitutionMedia = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!role?.institution_id) throw new Error("غير مسموح: هذه العملية لمدير المؤسسة فقط.");
 
-    const patch: Record<string, string> = {};
-    if (data.logoUrl) patch["logo_url"] = data.logoUrl;
-    if (data.coverUrl) patch["cover_url"] = data.coverUrl;
+    const patch: { logo_url?: string; cover_url?: string } = {};
+    if (data.logoUrl) patch.logo_url = data.logoUrl;
+    if (data.coverUrl) patch.cover_url = data.coverUrl;
     if (Object.keys(patch).length === 0) return { ok: true as const };
 
     const { error } = await context.supabase
