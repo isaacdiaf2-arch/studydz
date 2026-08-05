@@ -22,7 +22,7 @@ export const WILAYAS = [
 const dzPhone = z
   .string()
   .trim()
-  .regex(/^0[5-7][0-9]{8}$/, "رقم هاتف جزائري غير صالح (مثال: 0671153558)");
+  .regex(/^0[5-7][0-9]{8}$/, "رقم هاتف جزائري غير صالح (مثال: 05XXXXXXXX)");
 
 const optionalText = (max: number) =>
   z.string().trim().max(max).optional().or(z.literal("")).transform((v) => v || null);
