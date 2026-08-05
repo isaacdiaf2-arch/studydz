@@ -59,20 +59,8 @@ function AuthPage() {
       return;
     }
 
-    // Apply a pending platform-admin unlock captured before sign-in.
-    let destination = search.redirect ?? "/dashboard";
-    const pending =
-      typeof window !== "undefined" ? sessionStorage.getItem(PENDING_UNLOCK_KEY) : null;
-    if (pending) {
-      sessionStorage.removeItem(PENDING_UNLOCK_KEY);
-      try {
-        await unlock({ data: { code: pending } });
-        toast.success("تم تفعيل صلاحية مدير المنصة.");
-        destination = "/admin";
-      } catch {
-        toast.error("رمز الدخول المحجوز غير صحيح.");
-      }
-    }
+    const destination = search.redirect ?? "/dashboard";
+
 
     setLoading(false);
     navigate({ to: destination });
