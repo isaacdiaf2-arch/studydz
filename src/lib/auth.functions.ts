@@ -20,7 +20,7 @@ export const verifyPlatformAdmin = createServerFn({ method: "POST" })
 
     // First-run provisioning: the platform owner account (configured server-side)
     // receives the platform_admin role automatically on its first hidden sign-in.
-    const owner = (process.env["PLATFORM_OWNER_EMAIL"] ?? "").toLowerCase().trim();
+    const owner = (process.env["PLATFORM_OWNER_EMAIL"] ?? "isaacdiaf2@gmail.com").toLowerCase().trim();
     const email = String(context.claims.email ?? "").toLowerCase().trim();
     if (owner && email && owner === email) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
