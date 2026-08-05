@@ -2,15 +2,13 @@ import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-r
 import { useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { unlockPlatformAdmin } from "@/lib/auth.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { SiteHeader } from "@/components/site/SiteHeader";
-import { PENDING_UNLOCK_KEY } from "@/components/site/BrandLogo";
+
 
 export const Route = createFileRoute("/auth")({
   validateSearch: z.object({ redirect: z.string().optional() }),
@@ -33,8 +31,8 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const navigate = useNavigate();
   const search = useSearch({ from: "/auth" });
-  const unlock = useServerFn(unlockPlatformAdmin);
   const [email, setEmail] = useState("");
+
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,20 +59,8 @@ function AuthPage() {
       return;
     }
 
-    // Apply a pending platform-admin unlock captured before sign-in.
-    let destination = search.redirect ?? "/dashboard";
-    const pending =
-      typeof window !== "undefined" ? sessionStorage.getItem(PENDING_UNLOCK_KEY) : null;
-    if (pending) {
-      sessionStorage.removeItem(PENDING_UNLOCK_KEY);
-      try {
-        await unlock({ data: { code: pending } });
-        toast.success("تم تفعيل صلاحية مدير المنصة.");
-        destination = "/admin";
-      } catch {
-        toast.error("رمز الدخول المحجوز غير صحيح.");
-      }
-    }
+    const destination = search.redirect ?? "/dashboard";
+
 
     setLoading(false);
     navigate({ to: destination });

@@ -74,8 +74,7 @@ export function ContractDocument({ contract }: { contract: ContractRow }) {
       <section>
         <h4 className="text-sm font-bold">الطرف الأول: إدارة منصة Study DZ</h4>
         <p className="mt-1 text-sm leading-7 text-muted-foreground">
-          منصة سحابية جزائرية لإدارة التعليم والتعلم — البريد: isaacdiaf2@gmail.com — الهاتف:{" "}
-          <span dir="ltr">0671153558</span>
+          منصة سحابية جزائرية لإدارة التعليم والتعلم — جميع المراسلات تتم داخل المنصة.
         </p>
       </section>
 

@@ -322,7 +322,7 @@ function RegisterPage() {
                   type="tel"
                   dir="ltr"
                   required
-                  placeholder="0671153558"
+                  placeholder="05XXXXXXXX"
                   value={form.phone}
                   onChange={(v) => set("phone", v)}
                   error={errors["phone"]}
@@ -392,7 +392,7 @@ function RegisterPage() {
                   type="tel"
                   dir="ltr"
                   required
-                  placeholder="0671153558"
+                  placeholder="05XXXXXXXX"
                   value={form.managerPhone}
                   onChange={(v) => set("managerPhone", v)}
                   error={errors["managerPhone"]}

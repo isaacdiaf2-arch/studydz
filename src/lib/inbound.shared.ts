@@ -6,7 +6,7 @@ export const trialRequestSchema = z.object({
   phone: z
     .string()
     .trim()
-    .regex(/^0[5-7][0-9]{8}$/, "رقم هاتف جزائري غير صالح (مثال: 0671153558)"),
+    .regex(/^0[5-7][0-9]{8}$/, "رقم هاتف جزائري غير صالح (مثال: 05XXXXXXXX)"),
   motivation: z.string().trim().min(20, "اشرح دافعك في 20 حرفًا على الأقل").max(1000),
 });
 

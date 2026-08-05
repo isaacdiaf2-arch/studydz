@@ -82,18 +82,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "حوّل مؤسستك إلى مؤسسة تعليمية رقمية متكاملة: لوحات تحكم للمدير والأستاذ والطالب، دروس واختبارات ونتائج، باشتراك سنوي 8,000 دج.",
+          "منصة SaaS تعليمية متكاملة لإدارة المؤسسات التعليمية الجزائرية في نظام واحد: لوحات تحكم للمدير والأستاذ والطالب، دروس واختبارات ونتائج، باشتراك سنوي 8,000 دج.",
       },
       { name: "author", content: "Study DZ" },
       { property: "og:title", content: "Study DZ — منصة سحابية جزائرية لإدارة التعليم" },
       {
         property: "og:description",
-        content: "حوّل مؤسستك إلى مؤسسة تعليمية رقمية متكاملة: لوحات تحكم للمدير والأستاذ والطالب، دروس واختبارات ونتائج، باشتراك سنوي 8,000 دج.",
+        content: "منصة SaaS تعليمية متكاملة لإدارة المؤسسات التعليمية الجزائرية في نظام واحد: لوحات تحكم للمدير والأستاذ والطالب، دروس واختبارات ونتائج، باشتراك سنوي 8,000 دج.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Study DZ — منصة سحابية جزائرية لإدارة التعليم" },
-      { name: "twitter:description", content: "حوّل مؤسستك إلى مؤسسة تعليمية رقمية متكاملة: لوحات تحكم للمدير والأستاذ والطالب، دروس واختبارات ونتائج، باشتراك سنوي 8,000 دج." },
+      { name: "twitter:description", content: "منصة SaaS تعليمية متكاملة لإدارة المؤسسات التعليمية الجزائرية في نظام واحد: لوحات تحكم للمدير والأستاذ والطالب، دروس واختبارات ونتائج، باشتراك سنوي 8,000 دج." },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5ececb8f-022c-4aef-bae6-72f5bfa4a329/id-preview-c4a12f50--61704c04-869c-4a94-8a4c-9499fed312d8.lovable.app-1785243113839.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5ececb8f-022c-4aef-bae6-72f5bfa4a329/id-preview-c4a12f50--61704c04-869c-4a94-8a4c-9499fed312d8.lovable.app-1785243113839.png" },
     ],

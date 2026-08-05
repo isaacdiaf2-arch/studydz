@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { unlockPlatformAdmin } from "@/lib/auth.functions";
+import { verifyPlatformAdmin } from "@/lib/auth.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,8 +16,6 @@ import {
 } from "@/components/ui/dialog";
 import logo from "@/assets/studydz-logo.png.asset.json";
 
-export const PENDING_UNLOCK_KEY = "studydz.pending_unlock";
-
 export function BrandLogo({
   size = "md",
   subtitle = true,
@@ -27,12 +25,13 @@ export function BrandLogo({
 }) {
   const box = size === "sm" ? "h-9 w-9" : "h-11 w-11";
   const navigate = useNavigate();
-  const unlock = useServerFn(unlockPlatformAdmin);
+  const verify = useServerFn(verifyPlatformAdmin);
 
   const clicks = useRef(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [open, setOpen] = useState(false);
-  const [code, setCode] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
 
   function registerClick() {
@@ -52,21 +51,25 @@ export function BrandLogo({
     e.preventDefault();
     setBusy(true);
     try {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        sessionStorage.setItem(PENDING_UNLOCK_KEY, code.trim());
-        setOpen(false);
-        toast.info("سجّل الدخول بحسابك أولاً، وسيتم تفعيل لوحة مدير المنصة تلقائياً.");
-        navigate({ to: "/auth" });
-        return;
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+      if (error) throw new Error("بيانات الدخول غير صحيحة.");
+
+      const result = await verify({ data: undefined });
+      if (!result.isPlatformAdmin) {
+        await supabase.auth.signOut();
+        throw new Error("هذا الحساب لا يملك صلاحية مدير المنصة.");
       }
-      await unlock({ data: { code: code.trim() } });
+
       setOpen(false);
-      setCode("");
-      toast.success("تم تفعيل صلاحية مدير المنصة.");
+      setEmail("");
+      setPassword("");
+      toast.success("مرحبًا بك في لوحة تحكم مدير المنصة.");
       navigate({ to: "/admin" });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "كلمة المرور غير صحيحة.");
+      toast.error(err instanceof Error ? err.message : "تعذّر الدخول.");
     } finally {
       setBusy(false);
     }
@@ -104,19 +107,30 @@ export function BrandLogo({
           <DialogHeader>
             <DialogTitle>دخول محجوز</DialogTitle>
             <DialogDescription>
-              أدخل كلمة المرور للوصول إلى لوحة تحكم مدير المنصة.
+              أدخل بيانات حساب مدير المنصة للدخول مباشرة إلى لوحة التحكم.
             </DialogDescription>
           </DialogHeader>
           <form className="space-y-4" onSubmit={submit}>
             <div className="grid gap-2">
-              <Label htmlFor="unlock-code">كلمة المرور</Label>
+              <Label htmlFor="unlock-email">البريد الإلكتروني</Label>
               <Input
-                id="unlock-code"
-                type="password"
+                id="unlock-email"
+                type="email"
+                dir="ltr"
                 autoFocus
                 required
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="unlock-password">كلمة المرور</Label>
+              <Input
+                id="unlock-password"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
             <Button type="submit" className="w-full" disabled={busy}>

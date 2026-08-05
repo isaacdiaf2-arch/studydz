@@ -126,7 +126,7 @@ function TrialPage() {
                   name="phone"
                   type="tel"
                   dir="ltr"
-                  placeholder="0671153558"
+                  placeholder="05XXXXXXXX"
                   maxLength={10}
                   required
                 />

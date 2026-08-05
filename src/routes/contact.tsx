@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Mail, Phone, Send, CheckCircle2, Loader2 } from "lucide-react";
+import { Send, CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,8 +12,6 @@ import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { submitSupportMessage } from "@/lib/inbound.functions";
 import { supportMessageSchema } from "@/lib/inbound.shared";
-
-import { SUPPORT_EMAIL, SUPPORT_PHONE, GMAIL_COMPOSE, WHATSAPP_LINK } from "@/components/site/SiteFooter";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -87,11 +85,8 @@ function Contact() {
       <main className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
         <h1 className="text-4xl">التواصل والدعم</h1>
         <p className="mt-3 text-muted-foreground">
-          املأ المعلومات التالية وسيتم إرسالها مباشرة إلى فريق الدعم على البريد{" "}
-          <span dir="ltr" className="font-semibold text-foreground">
-            {SUPPORT_EMAIL}
-          </span>
-          .
+          املأ المعلومات التالية وسيتم إرسالها مباشرة إلى فريق الدعم داخل المنصة، وسيصلك الرد على
+          بريدك الإلكتروني.
         </p>
 
         {sent ? (
@@ -99,12 +94,8 @@ function Contact() {
             <CheckCircle2 className="mx-auto h-12 w-12 text-success" />
             <h2 className="mt-4 text-2xl">تم استلام رسالتك</h2>
             <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-muted-foreground">
-              وصلت رسالتك إلى فريق الدعم وسيتم الرد عليك على بريدك الإلكتروني. للاستعجال يمكنك
-              مراسلتنا على{" "}
-              <a className="font-semibold text-primary" href={GMAIL_COMPOSE} target="_blank" rel="noreferrer" dir="ltr">
-                {SUPPORT_EMAIL}
-              </a>
-              .
+              وصلت رسالتك إلى فريق الدعم داخل المنصة وسيتم الرد عليك على بريدك الإلكتروني في
+              أقرب وقت.
             </p>
             <Button variant="outline" className="mt-6" onClick={() => setSent(false)}>
               إرسال رسالة أخرى
@@ -147,23 +138,8 @@ function Contact() {
         )}
 
 
-        <div className="card-soft mt-8 flex flex-wrap items-center gap-4 p-5 text-sm">
-          <a
-            className="flex items-center gap-2 font-semibold text-foreground"
-            href={WHATSAPP_LINK}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <Phone className="h-5 w-5 shrink-0 text-primary" />
-            <span dir="ltr">{SUPPORT_PHONE}</span>
-          </a>
-          <Mail className="h-5 w-5 shrink-0 text-primary" />
-          <span className="text-muted-foreground">
-            للدعم المباشر:{" "}
-            <a className="font-semibold text-foreground" href={GMAIL_COMPOSE} target="_blank" rel="noreferrer" dir="ltr">
-              {SUPPORT_EMAIL}
-            </a>
-          </span>
+        <div className="card-soft mt-8 p-5 text-sm text-muted-foreground">
+          جميع الطلبات والاستفسارات تُعالج حصريًا داخل المنصة، ولا يوجد أي قناة تواصل خارجية.
         </div>
       </main>
       <SiteFooter />

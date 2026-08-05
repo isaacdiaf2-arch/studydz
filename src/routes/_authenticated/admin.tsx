@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -24,6 +24,7 @@ import {
   Mail,
   ShieldCheck,
   Database,
+  MonitorSmartphone,
 } from "lucide-react";
 
 import { toast } from "sonner";
@@ -55,12 +56,13 @@ const nav = [
   { key: "institutions", label: "المؤسسات", icon: Building2 },
   { key: "subscriptions", label: "الاشتراكات", icon: CalendarClock },
   { key: "payments", label: "المدفوعات", icon: CreditCard },
-  { key: "contracts", label: "العقود", icon: FileSignature },
+  { key: "contracts", label: "العقود الإلكترونية", icon: FileSignature },
   { key: "users", label: "المستخدمون", icon: Users },
   { key: "trials", label: "طلبات التجربة", icon: Rocket },
   { key: "resets", label: "طلبات كلمة المرور", icon: KeyRound },
   { key: "reports", label: "التقارير", icon: Download },
   { key: "activity", label: "سجل العمليات", icon: Activity },
+  { key: "preview", label: "معاينة اللوحات", icon: MonitorSmartphone },
   { key: "support", label: "الدعم", icon: LifeBuoy },
 ];
 
@@ -499,6 +501,7 @@ function AdminDashboard() {
             <ModuleCard title="سجل العمليات" description="تتبع كل تغييرات المنصة" icon={Activity} onClick={() => setTab("activity")} />
             <ModuleCard title="التقارير والتصدير" description="تصدير البيانات بصيغة CSV" icon={Database} onClick={() => setTab("reports")} />
             <ModuleCard title="الدعم والرسائل" description="رسائل التواصل الواردة" icon={Mail} onClick={() => setTab("support")} />
+            <ModuleCard title="معاينة اللوحات" description="فتح لوحة المؤسسة والأستاذ والطالب" icon={MonitorSmartphone} onClick={() => setTab("preview")} />
           </div>
 
           <div className="card-soft flex items-start gap-3 p-4">
@@ -1009,6 +1012,36 @@ function AdminDashboard() {
           {(events.data ?? []).map((e) => (
             <EventRow key={e.id} event={e} institutionName={instNames.get(e.institution_id)} />
           ))}
+        </div>
+      )}
+
+      {tab === "preview" && (
+        <div className="space-y-4">
+          <div className="card-soft p-5">
+            <h2 className="text-lg">معاينة لوحات التحكم</h2>
+            <p className="mt-2 text-sm leading-7 text-muted-foreground">
+              افتح أي لوحة تحكم للتأكد من عملها ومعالجة أي مشكلة يواجهها المستخدمون. تُفتح اللوحات
+              في تبويب جديد بصلاحيات حسابك كمدير للمنصة.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {[
+              { to: "/institution", title: "لوحة مدير المؤسسة", desc: "الأقسام، الأساتذة، الطلاب، العقد" },
+              { to: "/teacher", title: "لوحة الأستاذ", desc: "الدروس، الاختبارات، النتائج" },
+              { to: "/student", title: "لوحة الطالب", desc: "الدروس، الاختبارات، الجدول" },
+            ].map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                target="_blank"
+                className="card-soft block p-5 transition-colors hover:bg-secondary"
+              >
+                <MonitorSmartphone className="h-5 w-5 text-primary" />
+                <h3 className="mt-3 text-base font-bold">{item.title}</h3>
+                <p className="mt-1 text-xs text-muted-foreground">{item.desc}</p>
+              </Link>
+            ))}
+          </div>
         </div>
       )}
 
