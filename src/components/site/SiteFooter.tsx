@@ -1,11 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Mail, Phone } from "lucide-react";
 import logo from "@/assets/studydz-logo.png.asset.json";
 
-export const SUPPORT_PHONE = "0671153558";
-export const SUPPORT_EMAIL = "isaacdiaf2@gmail.com";
-export const WHATSAPP_LINK = "https://wa.me/213671153558";
-export const GMAIL_COMPOSE = `https://mail.google.com/mail/?view=cm&fs=1&to=${SUPPORT_EMAIL}`;
 
 export function SiteFooter() {
   return (
@@ -55,30 +50,16 @@ export function SiteFooter() {
 
         <div>
           <h3 className="text-sm font-bold">التواصل</h3>
-          <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-            <li>
-              <a
-                className="flex items-center gap-2 hover:text-foreground"
-                href={GMAIL_COMPOSE}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <Mail className="h-4 w-4 shrink-0" />
-                <span dir="ltr">{SUPPORT_EMAIL}</span>
-              </a>
-            </li>
-            <li>
-              <a
-                className="flex items-center gap-2 hover:text-foreground"
-                href={WHATSAPP_LINK}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <Phone className="h-4 w-4 shrink-0" />
-                <span dir="ltr">{SUPPORT_PHONE}</span>
-              </a>
-            </li>
-          </ul>
+          <p className="mt-3 text-sm leading-7 text-muted-foreground">
+            كل التواصل والدعم يتم داخل المنصة فقط عبر صفحة التواصل والدعم، لضمان متابعة كل طلب
+            وتوثيقه.
+          </p>
+          <Link
+            to="/contact"
+            className="mt-3 inline-block text-sm font-semibold text-foreground underline"
+          >
+            صفحة التواصل والدعم
+          </Link>
         </div>
       </div>
       <div className="border-t border-border py-5 text-center text-xs text-muted-foreground">
