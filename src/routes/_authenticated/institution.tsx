@@ -40,7 +40,7 @@ const nav = [
   { key: "schedule", label: "الجدول", icon: CalendarDays },
   { key: "announcements", label: "الإعلانات", icon: Megaphone },
   { key: "subscription", label: "الاشتراك", icon: CreditCard },
-  { key: "contract", label: "العقد", icon: FileSignature },
+  { key: "contract", label: "العقود الإلكترونية", icon: FileSignature },
   { key: "settings", label: "الإعدادات", icon: Settings },
 ];
 

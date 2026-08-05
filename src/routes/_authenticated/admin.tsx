@@ -56,7 +56,7 @@ const nav = [
   { key: "institutions", label: "المؤسسات", icon: Building2 },
   { key: "subscriptions", label: "الاشتراكات", icon: CalendarClock },
   { key: "payments", label: "المدفوعات", icon: CreditCard },
-  { key: "contracts", label: "العقود", icon: FileSignature },
+  { key: "contracts", label: "العقود الإلكترونية", icon: FileSignature },
   { key: "users", label: "المستخدمون", icon: Users },
   { key: "trials", label: "طلبات التجربة", icon: Rocket },
   { key: "resets", label: "طلبات كلمة المرور", icon: KeyRound },
