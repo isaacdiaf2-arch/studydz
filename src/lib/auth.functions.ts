@@ -16,8 +16,22 @@ export const verifyPlatformAdmin = createServerFn({ method: "POST" })
       .eq("user_id", context.userId)
       .eq("role", "platform_admin")
       .maybeSingle();
-    return { isPlatformAdmin: !!data };
+    if (data) return { isPlatformAdmin: true };
+
+    // First-run provisioning: the platform owner account (configured server-side)
+    // receives the platform_admin role automatically on its first hidden sign-in.
+    const owner = (process.env["PLATFORM_OWNER_EMAIL"] ?? "").toLowerCase().trim();
+    const email = String(context.claims.email ?? "").toLowerCase().trim();
+    if (owner && email && owner === email) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await supabaseAdmin
+        .from("user_roles")
+        .upsert({ user_id: context.userId, role: "platform_admin" }, { onConflict: "user_id,role" });
+      return { isPlatformAdmin: true };
+    }
+    return { isPlatformAdmin: false };
   });
+
 
 
 
