@@ -34,7 +34,10 @@ export function SiteHeader() {
               {l.label}
             </Link>
           ))}
-          <Button asChild size="sm" className="ms-2">
+          <Button asChild size="sm" variant="outline" className="ms-2">
+            <Link to="/auth">تسجيل الدخول</Link>
+          </Button>
+          <Button asChild size="sm">
             <Link to="/register">تسجيل مؤسسة</Link>
           </Button>
         </nav>
@@ -62,6 +65,11 @@ export function SiteHeader() {
                 {l.label}
               </Link>
             ))}
+            <Button asChild variant="outline" className="mt-2">
+              <Link to="/auth" onClick={() => setOpen(false)}>
+                تسجيل الدخول
+              </Link>
+            </Button>
             <Button asChild className="mt-2">
               <Link to="/register" onClick={() => setOpen(false)}>
                 تسجيل مؤسسة جديدة
