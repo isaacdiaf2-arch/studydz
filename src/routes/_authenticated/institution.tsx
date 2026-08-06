@@ -26,6 +26,8 @@ import { SignaturePad } from "@/components/dashboard/SignaturePad";
 import { useAccount } from "@/lib/account";
 import { SchedulesManager } from "@/components/dashboard/SchedulesManager";
 import { createMember, deleteMember } from "@/lib/platform.functions";
+import { signContractAsInstitution } from "@/lib/contracts.functions";
+
 
 export const Route = createFileRoute("/_authenticated/institution")({
   component: InstitutionDashboard,
