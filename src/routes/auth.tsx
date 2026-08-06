@@ -8,6 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { SiteHeader } from "@/components/site/SiteHeader";
+import { useServerFn } from "@tanstack/react-start";
+import { startDemoSession } from "@/lib/demo.functions";
+import { DEMO_ACCOUNTS, type DemoRoleKey } from "@/lib/demo.shared";
 
 
 export const Route = createFileRoute("/auth")({
@@ -36,6 +39,29 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const startDemo = useServerFn(startDemoSession);
+  const [demoBusy, setDemoBusy] = useState<DemoRoleKey | null>(null);
+
+  async function handleDemo(role: DemoRoleKey) {
+    setError(null);
+    setDemoBusy(role);
+    try {
+      const account = await startDemo({ data: { role } });
+      const { error: demoError } = await supabase.auth.signInWithPassword({
+        email: account.email,
+        password: account.password,
+      });
+      if (demoError) throw new Error(demoError.message);
+      toast.success(`تم الدخول بحساب تجريبي: ${DEMO_ACCOUNTS[role].label}`);
+      navigate({ to: "/dashboard" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "تعذّر فتح الحساب التجريبي.";
+      setError(message);
+      toast.error(message);
+    } finally {
+      setDemoBusy(null);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -121,6 +147,38 @@ function AuthPage() {
             سجّل مؤسستك
           </Link>
         </p>
+
+        <section className="mt-10 rounded-2xl border border-border bg-card p-5">
+          <h2 className="text-lg font-bold">حسابات تجريبية</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            جرّب المنصة فورًا بحساب مؤقت مخصص لكل دور، ضمن مؤسسة تجريبية منفصلة عن البيانات الحقيقية.
+          </p>
+          <div className="mt-4 grid gap-3">
+            {(Object.keys(DEMO_ACCOUNTS) as DemoRoleKey[]).map((role) => (
+              <div
+                key={role}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border p-3"
+              >
+                <div className="min-w-0">
+                  <p className="font-semibold">{DEMO_ACCOUNTS[role].label}</p>
+                  <p className="text-xs text-muted-foreground">{DEMO_ACCOUNTS[role].description}</p>
+                  <p dir="ltr" className="mt-1 text-xs text-muted-foreground">
+                    {DEMO_ACCOUNTS[role].email} · {DEMO_ACCOUNTS[role].password}
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={demoBusy !== null}
+                  onClick={() => handleDemo(role)}
+                >
+                  {demoBusy === role ? "جارٍ التحضير…" : "دخول تجريبي"}
+                </Button>
+              </div>
+            ))}
+          </div>
+        </section>
 
       </main>
     </div>

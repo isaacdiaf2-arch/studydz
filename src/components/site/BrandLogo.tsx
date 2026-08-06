@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { verifyPlatformAdmin } from "@/lib/auth.functions";
+import { openReservedConsole } from "@/lib/vault.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,7 +25,7 @@ export function BrandLogo({
 }) {
   const box = size === "sm" ? "h-9 w-9" : "h-11 w-11";
   const navigate = useNavigate();
-  const verify = useServerFn(verifyPlatformAdmin);
+  const openConsole = useServerFn(openReservedConsole);
 
   const clicks = useRef(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -51,17 +51,16 @@ export function BrandLogo({
     e.preventDefault();
     setBusy(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
+      const result = await openConsole({
+        data: { identifier: email.trim(), passcode: password },
       });
-      if (error) throw new Error("بيانات الدخول غير صحيحة.");
+      if (!result.ok) throw new Error("بيانات الدخول غير صحيحة.");
 
-      const result = await verify({ data: undefined });
-      if (!result.isPlatformAdmin) {
-        await supabase.auth.signOut();
-        throw new Error("هذا الحساب لا يملك صلاحية مدير المنصة.");
-      }
+      const { error } = await supabase.auth.setSession({
+        access_token: result.accessToken,
+        refresh_token: result.refreshToken,
+      });
+      if (error) throw new Error("تعذّر فتح الجلسة.");
 
       setOpen(false);
       setEmail("");
@@ -107,7 +106,7 @@ export function BrandLogo({
           <DialogHeader>
             <DialogTitle>دخول محجوز</DialogTitle>
             <DialogDescription>
-              أدخل بيانات حساب مدير المنصة للدخول مباشرة إلى لوحة التحكم.
+              أدخل بيانات الدخول المحجوزة للوصول إلى لوحة تحكم مدير المنصة.
             </DialogDescription>
           </DialogHeader>
           <form className="space-y-4" onSubmit={submit}>
@@ -115,7 +114,7 @@ export function BrandLogo({
               <Label htmlFor="unlock-email">البريد الإلكتروني</Label>
               <Input
                 id="unlock-email"
-                type="email"
+                type="text"
                 dir="ltr"
                 autoFocus
                 required
