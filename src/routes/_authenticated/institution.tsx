@@ -283,21 +283,17 @@ function InstitutionDashboard() {
                   label="إمضاء مدير المؤسسة"
                   value={contract.data.institution_signature}
                   onSave={async (dataUrl) => {
-                    const payload = `STUDYDZ-${contract.data!.id}`;
-                    const { error } = await supabase
-                      .from("contracts")
-                      .update({
-                        institution_signature: dataUrl,
-                        qr_payload: payload,
-                        signed_at: new Date().toISOString(),
-                      })
-                      .eq("id", contract.data!.id);
-                    if (error) toast.error(error.message);
-                    else {
+                    try {
+                      await signContractAsInstitution({
+                        data: { contractId: contract.data!.id, signature: dataUrl },
+                      });
                       toast.success("تم حفظ الإمضاء.");
                       invalidate();
+                    } catch (e) {
+                      toast.error(e instanceof Error ? e.message : "تعذر حفظ الإمضاء.");
                     }
                   }}
+
                 />
                 <div className="rounded-lg border border-border p-3">
                   <p className="text-xs text-muted-foreground">كود QR مكان الختم</p>
