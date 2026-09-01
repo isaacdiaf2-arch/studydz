@@ -8,6 +8,13 @@
       "when": 1788225384297,
       "tag": "0000_institution_status_values",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788225447703,
+      "tag": "0001_core_platform_governance",
+      "breakpoints": true
     }
   ]
 }
