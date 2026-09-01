@@ -125,12 +125,12 @@
 }
 
 .dark {
-  --brand: oklch(0.68 0.17 292);
-  --brand-foreground: oklch(0.16 0 0);
-  --brand-soft: oklch(0.28 0.07 292);
-  --info: oklch(0.68 0.14 255);
+  --brand: oklch(0.66 0.12 248);
+  --brand-foreground: oklch(0.15 0.02 248);
+  --brand-soft: oklch(0.27 0.05 248);
+  --info: oklch(0.7 0.1 205);
   --info-foreground: oklch(0.16 0 0);
-  --info-soft: oklch(0.26 0.06 255);
+  --info-soft: oklch(0.26 0.05 205);
   --success-soft: oklch(0.26 0.06 155);
   --warning-soft: oklch(0.28 0.06 85);
   --destructive-soft: oklch(0.28 0.06 27);
