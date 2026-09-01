@@ -1199,7 +1199,13 @@ export type Database = {
         | "renewed"
         | "expired"
         | "cancelled"
-      institution_status: "pending" | "active" | "suspended" | "expired"
+      institution_status:
+        | "pending"
+        | "active"
+        | "suspended"
+        | "expired"
+        | "approved"
+        | "archived"
       payment_status: "pending" | "accepted" | "rejected" | "suspended"
       question_type: "mcq" | "truefalse" | "short"
     }
@@ -1339,7 +1345,14 @@ export const Constants = {
         "expired",
         "cancelled",
       ],
-      institution_status: ["pending", "active", "suspended", "expired"],
+      institution_status: [
+        "pending",
+        "active",
+        "suspended",
+        "expired",
+        "approved",
+        "archived",
+      ],
       payment_status: ["pending", "accepted", "rejected", "suspended"],
       question_type: ["mcq", "truefalse", "short"],
     },
