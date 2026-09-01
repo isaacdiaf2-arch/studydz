@@ -169,6 +169,98 @@ export type Database = {
           },
         ]
       }
+      audit_logs: {
+        Row: {
+          action: string
+          actor_id: string | null
+          actor_role: string | null
+          created_at: string
+          id: string
+          institution_id: string | null
+          ip: string | null
+          metadata: Json
+          resource: string | null
+          resource_id: string | null
+          result: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          actor_role?: string | null
+          created_at?: string
+          id?: string
+          institution_id?: string | null
+          ip?: string | null
+          metadata?: Json
+          resource?: string | null
+          resource_id?: string | null
+          result?: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          actor_role?: string | null
+          created_at?: string
+          id?: string
+          institution_id?: string | null
+          ip?: string | null
+          metadata?: Json
+          resource?: string | null
+          resource_id?: string | null
+          result?: string
+        }
+        Relationships: []
+      }
+      change_requests: {
+        Row: {
+          created_at: string
+          decision_note: string | null
+          id: string
+          institution_id: string | null
+          new_values: Json
+          old_values: Json
+          requester_id: string
+          reviewed_at: string | null
+          reviewer_id: string | null
+          status: string
+          target: string
+        }
+        Insert: {
+          created_at?: string
+          decision_note?: string | null
+          id?: string
+          institution_id?: string | null
+          new_values?: Json
+          old_values?: Json
+          requester_id: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          status?: string
+          target?: string
+        }
+        Update: {
+          created_at?: string
+          decision_note?: string | null
+          id?: string
+          institution_id?: string | null
+          new_values?: Json
+          old_values?: Json
+          requester_id?: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          status?: string
+          target?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "change_requests_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       classes: {
         Row: {
           created_at: string
@@ -479,6 +571,7 @@ export type Database = {
           accreditation_authority: string | null
           accreditation_number: string | null
           address: string | null
+          archived_at: string | null
           commercial_register: string | null
           commune: string
           cover_url: string | null
@@ -489,6 +582,7 @@ export type Database = {
           id: string
           instagram_url: string | null
           is_trial: boolean
+          legal_representative: string | null
           logo_url: string | null
           maps_url: string | null
           name: string
@@ -496,6 +590,9 @@ export type Database = {
           owner_id: string | null
           phone: string
           primary_color: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           status: Database["public"]["Enums"]["institution_status"]
           subscription_end: string | null
           trial_ends_at: string | null
@@ -507,6 +604,7 @@ export type Database = {
           accreditation_authority?: string | null
           accreditation_number?: string | null
           address?: string | null
+          archived_at?: string | null
           commercial_register?: string | null
           commune: string
           cover_url?: string | null
@@ -517,6 +615,7 @@ export type Database = {
           id?: string
           instagram_url?: string | null
           is_trial?: boolean
+          legal_representative?: string | null
           logo_url?: string | null
           maps_url?: string | null
           name: string
@@ -524,6 +623,9 @@ export type Database = {
           owner_id?: string | null
           phone: string
           primary_color?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: Database["public"]["Enums"]["institution_status"]
           subscription_end?: string | null
           trial_ends_at?: string | null
@@ -535,6 +637,7 @@ export type Database = {
           accreditation_authority?: string | null
           accreditation_number?: string | null
           address?: string | null
+          archived_at?: string | null
           commercial_register?: string | null
           commune?: string
           cover_url?: string | null
@@ -545,6 +648,7 @@ export type Database = {
           id?: string
           instagram_url?: string | null
           is_trial?: boolean
+          legal_representative?: string | null
           logo_url?: string | null
           maps_url?: string | null
           name?: string
@@ -552,6 +656,9 @@ export type Database = {
           owner_id?: string | null
           phone?: string
           primary_color?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: Database["public"]["Enums"]["institution_status"]
           subscription_end?: string | null
           trial_ends_at?: string | null
@@ -560,6 +667,60 @@ export type Database = {
           wilaya?: string
         }
         Relationships: []
+      }
+      invoices: {
+        Row: {
+          amount: number
+          id: string
+          institution_id: string
+          issued_at: string
+          method: string
+          number: string
+          payment_id: string | null
+          period_end: string | null
+          period_start: string | null
+          status: string
+        }
+        Insert: {
+          amount?: number
+          id?: string
+          institution_id: string
+          issued_at?: string
+          method?: string
+          number: string
+          payment_id?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          status?: string
+        }
+        Update: {
+          amount?: number
+          id?: string
+          institution_id?: string
+          issued_at?: string
+          method?: string
+          number?: string
+          payment_id?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lesson_completions: {
         Row: {
@@ -663,6 +824,53 @@ export type Database = {
             columns: ["subject_id"]
             isOneToOne: false
             referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          institution_id: string | null
+          link: string | null
+          read_at: string | null
+          recipient_id: string
+          sender_id: string | null
+          title: string
+          type: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          id?: string
+          institution_id?: string | null
+          link?: string | null
+          read_at?: string | null
+          recipient_id: string
+          sender_id?: string | null
+          title: string
+          type?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          institution_id?: string | null
+          link?: string | null
+          read_at?: string | null
+          recipient_id?: string
+          sender_id?: string | null
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
         ]
@@ -1188,6 +1396,10 @@ export type Database = {
       }
       is_institution_admin: { Args: never; Returns: boolean }
       is_platform_admin: { Args: never; Returns: boolean }
+      manages_institution: {
+        Args: { _institution_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "platform_admin" | "institution_admin" | "teacher" | "student"
@@ -1199,7 +1411,13 @@ export type Database = {
         | "renewed"
         | "expired"
         | "cancelled"
-      institution_status: "pending" | "active" | "suspended" | "expired"
+      institution_status:
+        | "pending"
+        | "active"
+        | "suspended"
+        | "expired"
+        | "approved"
+        | "archived"
       payment_status: "pending" | "accepted" | "rejected" | "suspended"
       question_type: "mcq" | "truefalse" | "short"
     }
@@ -1339,7 +1557,14 @@ export const Constants = {
         "expired",
         "cancelled",
       ],
-      institution_status: ["pending", "active", "suspended", "expired"],
+      institution_status: [
+        "pending",
+        "active",
+        "suspended",
+        "expired",
+        "approved",
+        "archived",
+      ],
       payment_status: ["pending", "accepted", "rejected", "suspended"],
       question_type: ["mcq", "truefalse", "short"],
     },
