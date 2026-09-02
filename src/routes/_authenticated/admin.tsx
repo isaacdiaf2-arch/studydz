@@ -46,6 +46,12 @@ import { resolvePasswordReset } from "@/lib/auth.functions";
 import { decideTrialRequest } from "@/lib/inbound.functions";
 
 import { SignatureSheet } from "@/components/dashboard/SignatureSheet";
+import {
+  InstitutionReviewPanel,
+  ChangeRequestsPanel,
+  AuditLogPanel,
+  InvoicesPanel,
+} from "@/components/dashboard/AdminGovernance";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminDashboard,
