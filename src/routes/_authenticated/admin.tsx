@@ -46,6 +46,12 @@ import { resolvePasswordReset } from "@/lib/auth.functions";
 import { decideTrialRequest } from "@/lib/inbound.functions";
 
 import { SignatureSheet } from "@/components/dashboard/SignatureSheet";
+import {
+  InstitutionReviewPanel,
+  ChangeRequestsPanel,
+  AuditLogPanel,
+  InvoicesPanel,
+} from "@/components/dashboard/AdminGovernance";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminDashboard,
@@ -53,14 +59,18 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 const nav = [
   { key: "home", label: "الرئيسية", icon: BarChart3 },
+  { key: "review", label: "مراجعة الطلبات", icon: ShieldCheck },
   { key: "institutions", label: "المؤسسات", icon: Building2 },
   { key: "subscriptions", label: "الاشتراكات", icon: CalendarClock },
   { key: "payments", label: "المدفوعات", icon: CreditCard },
+  { key: "invoices", label: "الفواتير", icon: Banknote },
   { key: "contracts", label: "العقود الإلكترونية", icon: FileSignature },
   { key: "users", label: "المستخدمون", icon: Users },
+  { key: "changes", label: "طلبات التعديل", icon: Mail },
   { key: "trials", label: "طلبات التجربة", icon: Rocket },
   { key: "resets", label: "طلبات كلمة المرور", icon: KeyRound },
   { key: "reports", label: "التقارير", icon: Download },
+  { key: "audit", label: "سجل التدقيق", icon: Database },
   { key: "activity", label: "سجل العمليات", icon: Activity },
   { key: "preview", label: "معاينة اللوحات", icon: MonitorSmartphone },
   { key: "support", label: "الدعم", icon: LifeBuoy },
@@ -69,9 +79,11 @@ const nav = [
 
 const statusLabels: Record<string, string> = {
   pending: "🟡 قيد المراجعة",
+  approved: "🔵 مقبولة",
   active: "🟢 نشطة",
   suspended: "🟠 موقوفة",
   expired: "🔴 منتهية",
+  archived: "⚫ مؤرشفة",
 };
 
 const roleLabels: Record<string, string> = {
@@ -513,6 +525,14 @@ function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {tab === "review" && <InstitutionReviewPanel />}
+
+      {tab === "changes" && <ChangeRequestsPanel />}
+
+      {tab === "audit" && <AuditLogPanel />}
+
+      {tab === "invoices" && <InvoicesPanel allowIssue />}
 
       {tab === "trials" && (
         <div className="space-y-3">
