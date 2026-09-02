@@ -526,6 +526,14 @@ function AdminDashboard() {
         </div>
       )}
 
+      {tab === "review" && <InstitutionReviewPanel />}
+
+      {tab === "changes" && <ChangeRequestsPanel />}
+
+      {tab === "audit" && <AuditLogPanel />}
+
+      {tab === "invoices" && <InvoicesPanel allowIssue />}
+
       {tab === "trials" && (
         <div className="space-y-3">
           <h2 className="text-lg">🚀 طلبات التجربة المجانية (24 ساعة)</h2>
