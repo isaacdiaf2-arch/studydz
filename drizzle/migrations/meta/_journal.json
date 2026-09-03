@@ -15,6 +15,13 @@
       "when": 1788225447703,
       "tag": "0001_core_platform_governance",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788395312729,
+      "tag": "0002_academic_structure_and_licenses",
+      "breakpoints": true
     }
   ]
 }
