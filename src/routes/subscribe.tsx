@@ -71,7 +71,7 @@ function Subscribe() {
           <div className="surface-hero border-b border-border p-6">
             <h2 className="text-xl text-foreground">معلومات الدفع</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              المبلغ المطلوب: 8,000.00 دج — دفع سنوي
+              المبلغ المطلوب: 9,000.00 دج — دفع سنوي
             </p>
           </div>
 
@@ -141,7 +141,7 @@ function Subscribe() {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="pay-amount">المبلغ المدفوع (دج)</Label>
-                <Input id="pay-amount" type="number" defaultValue={8000} required />
+                <Input id="pay-amount" type="number" defaultValue={9000} required />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="pay-method">طريقة الدفع</Label>
