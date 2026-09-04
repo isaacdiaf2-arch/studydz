@@ -52,6 +52,7 @@ import {
   AuditLogPanel,
   InvoicesPanel,
 } from "@/components/dashboard/AdminGovernance";
+import { LicensesPanel } from "@/components/dashboard/LicensesPanel";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminDashboard,
@@ -65,6 +66,7 @@ const nav = [
   { key: "payments", label: "المدفوعات", icon: CreditCard },
   { key: "invoices", label: "الفواتير", icon: Banknote },
   { key: "contracts", label: "العقود الإلكترونية", icon: FileSignature },
+  { key: "licenses", label: "التراخيص", icon: KeyRound },
   { key: "users", label: "المستخدمون", icon: Users },
   { key: "changes", label: "طلبات التعديل", icon: Mail },
   { key: "trials", label: "طلبات التجربة", icon: Rocket },
@@ -527,6 +529,8 @@ function AdminDashboard() {
       )}
 
       {tab === "review" && <InstitutionReviewPanel />}
+
+      {tab === "licenses" && <LicensesPanel />}
 
       {tab === "changes" && <ChangeRequestsPanel />}
 
