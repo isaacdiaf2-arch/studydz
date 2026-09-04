@@ -1,0 +1,15 @@
+{
+  "name": "Study DZ — نظام تشغيل المؤسسات التعليمية",
+  "short_name": "Study DZ",
+  "description": "منصة SaaS جزائرية لإدارة المؤسسات التعليمية والتكوينية.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    { "src": "/favicon.ico", "sizes": "48x48", "type": "image/x-icon" }
+  ]
+}
