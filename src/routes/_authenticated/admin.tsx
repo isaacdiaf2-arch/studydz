@@ -52,6 +52,7 @@ import {
   AuditLogPanel,
   InvoicesPanel,
 } from "@/components/dashboard/AdminGovernance";
+import { LicensesPanel } from "@/components/dashboard/LicensesPanel";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminDashboard,
