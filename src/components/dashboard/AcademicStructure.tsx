@@ -157,7 +157,7 @@ export function AcademicStructure({ readOnly = false }: { readOnly?: boolean }) 
           ))}
         </ul>
         {(data?.programs ?? []).length === 0 && (
-          <EmptyState title="لا توجد مسارات بعد" description="أضف أول مسار أو فرع لمؤسستك." />
+          <EmptyState text="لا توجد مسارات بعد" />
         )}
       </section>
 
@@ -222,7 +222,7 @@ export function AcademicStructure({ readOnly = false }: { readOnly?: boolean }) 
           ))}
         </ul>
         {(data?.specializations ?? []).length === 0 && (
-          <EmptyState title="لا توجد تخصصات بعد" description="أضف تخصصات مؤسستك." />
+          <EmptyState text="لا توجد تخصصات بعد" />
         )}
       </section>
 
@@ -298,7 +298,7 @@ export function AcademicStructure({ readOnly = false }: { readOnly?: boolean }) 
           ))}
         </ul>
         {(data?.levels ?? []).length === 0 && (
-          <EmptyState title="لا توجد مستويات بعد" description="أضف مستويات التكوين." />
+          <EmptyState text="لا توجد مستويات بعد" />
         )}
       </section>
 
@@ -374,7 +374,7 @@ export function AcademicStructure({ readOnly = false }: { readOnly?: boolean }) 
           ))}
         </ul>
         {(data?.groups ?? []).length === 0 && (
-          <EmptyState title="لا توجد أفواج بعد" description="أضف أفواج المتربصين." />
+          <EmptyState text="لا توجد أفواج بعد" />
         )}
       </section>
 
@@ -453,7 +453,7 @@ export function AcademicStructure({ readOnly = false }: { readOnly?: boolean }) 
           ))}
         </ul>
         {(data?.modules ?? []).length === 0 && (
-          <EmptyState title="لا توجد وحدات بعد" description="أضف وحدات التكوين." />
+          <EmptyState text="لا توجد وحدات بعد" />
         )}
       </section>
 
@@ -515,7 +515,7 @@ export function AcademicStructure({ readOnly = false }: { readOnly?: boolean }) 
           ))}
         </ul>
         {(data?.skills ?? []).length === 0 && (
-          <EmptyState title="لا توجد مهارات بعد" description="أضف مهارات مرتبطة بالوحدات." />
+          <EmptyState text="لا توجد مهارات بعد" />
         )}
       </section>
     </div>
