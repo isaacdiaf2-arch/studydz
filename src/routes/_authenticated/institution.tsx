@@ -27,6 +27,7 @@ import { useAccount } from "@/lib/account";
 import { SchedulesManager } from "@/components/dashboard/SchedulesManager";
 import { createMember, deleteMember } from "@/lib/platform.functions";
 import { signContractAsInstitution } from "@/lib/contracts.functions";
+import { AcademicStructure } from "@/components/dashboard/AcademicStructure";
 
 
 export const Route = createFileRoute("/_authenticated/institution")({
@@ -39,6 +40,7 @@ const nav = [
   { key: "students", label: "الطلاب", icon: GraduationCap },
   { key: "classes", label: "الأقسام", icon: Building2 },
   { key: "subjects", label: "المواد", icon: BookOpen },
+  { key: "academic", label: "البنية الأكاديمية", icon: GraduationCap },
   { key: "schedule", label: "الجدول", icon: CalendarDays },
   { key: "announcements", label: "الإعلانات", icon: Megaphone },
   { key: "subscription", label: "الاشتراك", icon: CreditCard },
@@ -244,6 +246,8 @@ function InstitutionDashboard() {
           onDone={invalidate}
         />
       )}
+
+      {tab === "academic" && institutionId && <AcademicStructure />}
 
       {tab === "schedule" && institutionId && (
         <SchedulesManager
@@ -687,7 +691,7 @@ function SubscriptionSection({
           }
           const { error } = await supabase.from("payments").insert({
             institution_id: institutionId,
-            amount: 8000,
+            amount: 9000,
             method: "CCP",
             paid_at: paidAt,
             proof_url: path,
@@ -701,7 +705,7 @@ function SubscriptionSection({
           }
         }}
       >
-        <h2 className="text-lg">رفع وصل الدفع (8,000 دج)</h2>
+        <h2 className="text-lg">رفع وصل الدفع (9,000 دج)</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="grid gap-2">
             <Label htmlFor="paid-at">تاريخ الدفع</Label>

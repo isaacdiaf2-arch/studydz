@@ -7,16 +7,16 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
-      { title: "الأسعار — اشتراك سنوي 8,000 دج | Study DZ" },
+      { title: "الأسعار — اشتراك سنوي 9,000 دج | Study DZ" },
       {
         name: "description",
         content:
-          "الباقة الأساسية من Study DZ: أساتذة وطلاب وأقسام غير محدودة، دروس وملفات واختبارات، باشتراك سنوي 8,000 دج.",
+          "الباقة الأساسية من Study DZ: أساتذة وطلاب وأقسام غير محدودة، دروس وملفات واختبارات، باشتراك سنوي 9,000 دج.",
       },
-      { property: "og:title", content: "الأسعار — اشتراك سنوي 8,000 دج | Study DZ" },
+      { property: "og:title", content: "الأسعار — اشتراك سنوي 9,000 دج | Study DZ" },
       {
         property: "og:description",
-        content: "باقة واحدة بسيطة لكل المؤسسات التعليمية الجزائرية بسعر 8,000 دج سنويًا.",
+        content: "باقة واحدة بسيطة لكل المؤسسات التعليمية الجزائرية بسعر 9,000 دج سنويًا.",
       },
     ],
   }),
