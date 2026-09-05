@@ -307,6 +307,96 @@ export type Database = {
           },
         ]
       }
+      attendance_records: {
+        Row: {
+          class_id: string | null
+          created_at: string
+          group_id: string | null
+          id: string
+          institution_id: string
+          minutes_late: number
+          module_id: string | null
+          period_index: number
+          reason: string | null
+          recorded_by: string | null
+          session_date: string
+          status: string
+          student_id: string
+          subject_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          class_id?: string | null
+          created_at?: string
+          group_id?: string | null
+          id?: string
+          institution_id: string
+          minutes_late?: number
+          module_id?: string | null
+          period_index?: number
+          reason?: string | null
+          recorded_by?: string | null
+          session_date?: string
+          status?: string
+          student_id: string
+          subject_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          class_id?: string | null
+          created_at?: string
+          group_id?: string | null
+          id?: string
+          institution_id?: string
+          minutes_late?: number
+          module_id?: string | null
+          period_index?: number
+          reason?: string | null
+          recorded_by?: string | null
+          session_date?: string
+          status?: string
+          student_id?: string
+          subject_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_records_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_records_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_records_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_records_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_records_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
