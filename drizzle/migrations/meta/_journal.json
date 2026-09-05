@@ -22,6 +22,13 @@
       "when": 1788395312729,
       "tag": "0002_academic_structure_and_licenses",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1788568126586,
+      "tag": "0003_create_attendance_records",
+      "breakpoints": true
     }
   ]
 }
