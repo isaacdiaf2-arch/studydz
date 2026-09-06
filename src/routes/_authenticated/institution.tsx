@@ -8,6 +8,7 @@ import {
   Building2,
   CalendarDays,
   CalendarClock,
+  Download as DownloadIcon,
   CreditCard,
   FileSignature,
   GraduationCap,
@@ -30,6 +31,7 @@ import { createMember, deleteMember } from "@/lib/platform.functions";
 import { signContractAsInstitution } from "@/lib/contracts.functions";
 import { AcademicStructure } from "@/components/dashboard/AcademicStructure";
 import { AttendancePanel } from "@/components/dashboard/AttendancePanel";
+import { DownloadCenter } from "@/components/dashboard/DownloadCenter";
 
 
 export const Route = createFileRoute("/_authenticated/institution")({
@@ -48,6 +50,7 @@ const nav = [
   { key: "announcements", label: "الإعلانات", icon: Megaphone },
   { key: "subscription", label: "الاشتراك", icon: CreditCard },
   { key: "contract", label: "العقود الإلكترونية", icon: FileSignature },
+  { key: "download", label: "تحميل Study DZ", icon: DownloadIcon },
   { key: "settings", label: "الإعدادات", icon: Settings },
 ];
 
@@ -253,6 +256,8 @@ function InstitutionDashboard() {
       {tab === "academic" && institutionId && <AcademicStructure />}
 
       {tab === "attendance" && institutionId && <AttendancePanel institutionId={institutionId} />}
+
+      {tab === "download" && <DownloadCenter />}
 
       {tab === "schedule" && institutionId && (
         <SchedulesManager

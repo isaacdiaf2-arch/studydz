@@ -23,6 +23,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedTeacherRouteImport } from './routes/_authenticated/teacher'
 import { Route as AuthenticatedStudentRouteImport } from './routes/_authenticated/student'
 import { Route as AuthenticatedInstitutionRouteImport } from './routes/_authenticated/institution'
+import { Route as AuthenticatedDownloadRouteImport } from './routes/_authenticated/download'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 
@@ -96,6 +97,11 @@ const AuthenticatedInstitutionRoute =
     path: '/institution',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDownloadRoute = AuthenticatedDownloadRouteImport.update({
+  id: '/download',
+  path: '/download',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/trial': typeof TrialRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/download': typeof AuthenticatedDownloadRoute
   '/institution': typeof AuthenticatedInstitutionRoute
   '/student': typeof AuthenticatedStudentRoute
   '/teacher': typeof AuthenticatedTeacherRoute
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
   '/trial': typeof TrialRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/download': typeof AuthenticatedDownloadRoute
   '/institution': typeof AuthenticatedInstitutionRoute
   '/student': typeof AuthenticatedStudentRoute
   '/teacher': typeof AuthenticatedTeacherRoute
@@ -156,6 +164,7 @@ export interface FileRoutesById {
   '/trial': typeof TrialRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/download': typeof AuthenticatedDownloadRoute
   '/_authenticated/institution': typeof AuthenticatedInstitutionRoute
   '/_authenticated/student': typeof AuthenticatedStudentRoute
   '/_authenticated/teacher': typeof AuthenticatedTeacherRoute
@@ -175,6 +184,7 @@ export interface FileRouteTypes {
     | '/trial'
     | '/admin'
     | '/dashboard'
+    | '/download'
     | '/institution'
     | '/student'
     | '/teacher'
@@ -192,6 +202,7 @@ export interface FileRouteTypes {
     | '/trial'
     | '/admin'
     | '/dashboard'
+    | '/download'
     | '/institution'
     | '/student'
     | '/teacher'
@@ -210,6 +221,7 @@ export interface FileRouteTypes {
     | '/trial'
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
+    | '/_authenticated/download'
     | '/_authenticated/institution'
     | '/_authenticated/student'
     | '/_authenticated/teacher'
@@ -329,6 +341,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInstitutionRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/download': {
+      id: '/_authenticated/download'
+      path: '/download'
+      fullPath: '/download'
+      preLoaderRoute: typeof AuthenticatedDownloadRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -349,6 +368,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedDownloadRoute: typeof AuthenticatedDownloadRoute
   AuthenticatedInstitutionRoute: typeof AuthenticatedInstitutionRoute
   AuthenticatedStudentRoute: typeof AuthenticatedStudentRoute
   AuthenticatedTeacherRoute: typeof AuthenticatedTeacherRoute
@@ -357,6 +377,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedDownloadRoute: AuthenticatedDownloadRoute,
   AuthenticatedInstitutionRoute: AuthenticatedInstitutionRoute,
   AuthenticatedStudentRoute: AuthenticatedStudentRoute,
   AuthenticatedTeacherRoute: AuthenticatedTeacherRoute,
