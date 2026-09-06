@@ -4,6 +4,9 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export const LICENSE_AMOUNT = 9000;
 
+/** Current Study DZ server release served to on-premise installations. */
+export const SERVER_VERSION = "1.3.0";
+
 async function requirePlatformAdmin(context: { supabase: any; userId: string }) {
   const { data } = await context.supabase
     .from("user_roles")
@@ -14,10 +17,13 @@ async function requirePlatformAdmin(context: { supabase: any; userId: string }) 
   if (!data) throw new Error("غير مسموح: مدير المنصة فقط.");
 }
 
+/** Cryptographically secure license key (no predictable Math.random). */
 function generateKey() {
-  const block = () =>
-    Math.random().toString(36).toUpperCase().replace(/[^A-Z0-9]/g, "").padEnd(5, "X").slice(0, 5);
-  return `SDZ-${block()}-${block()}-${block()}`;
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const bytes = crypto.getRandomValues(new Uint8Array(15));
+  const chars = Array.from(bytes, (b) => alphabet[b % alphabet.length]);
+  const block = (i: number) => chars.slice(i * 5, i * 5 + 5).join("");
+  return `SDZ-${block(0)}-${block(1)}-${block(2)}`;
 }
 
 /** Platform admin: list every license with its institution. */
@@ -182,4 +188,51 @@ export const renewLicense = createServerFn({ method: "POST" })
       metadata: { months: data.months },
     });
     return { ok: true as const, expiresOn: base.toISOString().slice(0, 10) };
+  });
+
+/** Installation / on-premise info for the caller's own institution. */
+export const getInstallationInfo = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: role } = await context.supabase
+      .from("user_roles")
+      .select("institution_id, role")
+      .eq("user_id", context.userId)
+      .eq("role", "institution_admin")
+      .maybeSingle();
+    const institutionId = role?.institution_id as string | undefined;
+    if (!institutionId) return null;
+
+    const [{ data: institution }, { data: license }] = await Promise.all([
+      context.supabase.from("institutions").select("id, name, status, subscription_end").eq("id", institutionId).maybeSingle(),
+      context.supabase
+        .from("licenses")
+        .select("*")
+        .eq("institution_id", institutionId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
+
+    const active =
+      !!license &&
+      license.status === "active" &&
+      (!license.expires_on || new Date(license.expires_on) >= new Date());
+
+    return {
+      institution: institution ?? null,
+      license: license ?? null,
+      active,
+      release: {
+        version: SERVER_VERSION,
+        channel: "stable" as const,
+        platforms: ["Windows Server 2019+ / Windows 10+", "Linux (مخطط له)"],
+        requirements: [
+          "معالج 2 نواة وذاكرة 4 غيغابايت على الأقل",
+          "مساحة تخزين 10 غيغابايت",
+          "PostgreSQL 15 أو أحدث (محلي)",
+          "شبكة داخلية للمؤسسة",
+        ],
+      },
+    };
   });
