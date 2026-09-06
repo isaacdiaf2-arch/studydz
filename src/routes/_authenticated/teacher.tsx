@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { BarChart3, BookOpen, CalendarDays, ClipboardList, FileText, Megaphone, Table2 } from "lucide-react";
+import { BarChart3, BookOpen, CalendarClock, CalendarDays, ClipboardList, FileText, Megaphone, Table2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { DashboardShell, StatCard, EmptyState } from "@/components/dashboard/Das
 import { useAccount } from "@/lib/account";
 import { useScheduleView } from "@/lib/useScheduleView";
 import { TodayScheduleCard, WeekScheduleGrid } from "@/components/dashboard/ScheduleViews";
+import { AttendancePanel } from "@/components/dashboard/AttendancePanel";
 
 export const Route = createFileRoute("/_authenticated/teacher")({
   component: TeacherDashboard,
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/_authenticated/teacher")({
 const nav = [
   { key: "home", label: "الرئيسية", icon: BarChart3 },
   { key: "schedule", label: "جدولي", icon: CalendarDays },
+  { key: "attendance", label: "الحضور والتأخرات", icon: CalendarClock },
   { key: "subjects", label: "موادي", icon: BookOpen },
   { key: "lessons", label: "الدروس", icon: FileText },
   { key: "exams", label: "الاختبارات", icon: ClipboardList },
@@ -132,6 +134,8 @@ function TeacherDashboard() {
           />
         </div>
       )}
+
+      {tab === "attendance" && <AttendancePanel institutionId={institutionId} />}
 
       {tab === "schedule" && (
         <WeekScheduleGrid
