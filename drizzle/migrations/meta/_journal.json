@@ -29,13 +29,6 @@
       "when": 1788568126586,
       "tag": "0003_create_attendance_records",
       "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1788702330056,
-      "tag": "0004_security_mfa_and_rate_limits",
-      "breakpoints": true
     }
   ]
 }

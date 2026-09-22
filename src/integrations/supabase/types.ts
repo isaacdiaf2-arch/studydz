@@ -439,33 +439,6 @@ export type Database = {
         }
         Relationships: []
       }
-      auth_attempts: {
-        Row: {
-          created_at: string
-          id: string
-          identifier: string
-          ip: string | null
-          kind: string
-          success: boolean
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          identifier: string
-          ip?: string | null
-          kind?: string
-          success?: boolean
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          identifier?: string
-          ip?: string | null
-          kind?: string
-          success?: boolean
-        }
-        Relationships: []
-      }
       change_requests: {
         Row: {
           created_at: string
@@ -2014,39 +1987,6 @@ export type Database = {
           trial_ends_at?: string | null
           trial_started_at?: string | null
           updated_at?: string
-        }
-        Relationships: []
-      }
-      user_mfa: {
-        Row: {
-          confirmed_at: string | null
-          created_at: string
-          enabled: boolean
-          last_used_step: number | null
-          recovery_codes: string[]
-          secret: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          confirmed_at?: string | null
-          created_at?: string
-          enabled?: boolean
-          last_used_step?: number | null
-          recovery_codes?: string[]
-          secret: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          confirmed_at?: string | null
-          created_at?: string
-          enabled?: boolean
-          last_used_step?: number | null
-          recovery_codes?: string[]
-          secret?: string
-          updated_at?: string
-          user_id?: string
         }
         Relationships: []
       }
