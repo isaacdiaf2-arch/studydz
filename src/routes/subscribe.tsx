@@ -1,11 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { AlertTriangle, Upload, CheckCircle2, Clock, XCircle, PauseCircle } from "lucide-react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { AlertTriangle, Upload, CheckCircle2, Clock, XCircle, PauseCircle, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
+import { submitPaymentProof } from "@/lib/payment.functions";
+import { useAccount } from "@/lib/account";
 
 export const Route = createFileRoute("/subscribe")({
   head: () => ({
@@ -38,8 +44,65 @@ const flow = [
 ];
 
 function Subscribe() {
-  const [file, setFile] = useState<string | null>(null);
+  const account = useAccount();
+  const submitProof = useServerFn(submitPaymentProof);
+  const [file, setFile] = useState<File | null>(null);
+  const [paidAt, setPaidAt] = useState(new Date().toISOString().slice(0, 10));
+  const [reference, setReference] = useState("");
+  const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
+
+  const institutionId = account.data?.profile?.institution_id as string | undefined;
+  const institutionName = account.data?.institution?.name ?? "—";
+
+  const existingPayments = useQuery({
+    queryKey: ["subscribe", "payments", institutionId],
+    enabled: !!institutionId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("payments")
+        .select("*")
+        .eq("institution_id", institutionId!)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const pendingPayment = (existingPayments.data ?? []).find((p) => p.status === "pending");
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      if (!institutionId) throw new Error("يجب تسجيل الدخول كمدير مؤسسة أولاً.");
+      if (!file) throw new Error("يرجى اختيار ملف وصل الدفع.");
+
+      setBusy(true);
+      const ext = file.name.split(".").pop()?.toLowerCase() ?? "pdf";
+      const path = `${institutionId}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "")}`;
+      const { error: upErr } = await supabase.storage
+        .from("payment-proofs")
+        .upload(path, file, { contentType: file.type || "application/octet-stream" });
+      if (upErr) throw new Error(upErr.message);
+
+      return submitProof({
+        data: {
+          paidAt,
+          amount: 9000,
+          reference: reference.trim() || null,
+          proofPath: path,
+        },
+      });
+    },
+    onSuccess: () => {
+      toast.success("تم إرسال وصل الدفع وهو الآن قيد المراجعة.");
+      setSent(true);
+      existingPayments.refetch();
+    },
+    onError: (e: Error) => toast.error(e.message),
+    onSettled: () => setBusy(false),
+  });
+
+  const showForm = !pendingPayment && !sent;
 
   return (
     <div className="min-h-screen">
@@ -50,6 +113,15 @@ function Subscribe() {
           سعر الاشتراك السنوي ثابت: <strong>9,000 دج</strong> لكل مؤسسة، والدفع يتم حاليًا عبر
           الحساب البريدي CCP مع تحقق يدوي من إدارة المنصة.
         </p>
+
+        {!institutionId && (
+          <div className="mt-6 rounded-xl border border-warning/50 bg-warning/15 p-4 text-sm">
+            يجب تسجيل الدخول كمدير مؤسسة لرفع وصل الدفع.{" "}
+            <Link to="/auth" className="font-semibold underline">تسجيل الدخول</Link>{" "}
+            أو{" "}
+            <Link to="/register" className="font-semibold underline">تسجيل مؤسسة جديدة</Link>.
+          </div>
+        )}
 
         <div className="card-soft mt-8 p-6">
           <h2 className="text-xl">مسار الاشتراك</h2>
@@ -109,43 +181,68 @@ function Subscribe() {
           </div>
         </div>
 
-        {sent ? (
+        {pendingPayment && (
           <div className="card-soft mt-8 p-8 text-center">
             <Clock className="mx-auto h-12 w-12 text-warning" />
             <h2 className="mt-4 text-2xl">🟡 طلبك قيد المراجعة</h2>
             <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-muted-foreground">
-              تم استلام وصل الدفع. سيقوم مدير المنصة بالتحقق يدويًا من الوصل، وعند القبول يُفعّل
-              حساب مؤسستكم مباشرة لمدة سنة كاملة.
+              تم استلام وصل الدفع بمبلغ {Number(pendingPayment.amount).toLocaleString("en-US")} دج
+              بتاريخ {pendingPayment.paid_at}. سيقوم مدير المنصة بالتحقق يدويًا من الوصل، وعند القبول
+              يُفعّل حساب مؤسستكم مباشرة لمدة سنة كاملة.
+            </p>
+          </div>
+        )}
+
+        {sent && !pendingPayment && (
+          <div className="card-soft mt-8 p-8 text-center">
+            <CheckCircle2 className="mx-auto h-12 w-12 text-success" />
+            <h2 className="mt-4 text-2xl">تم إرسال وصل الدفع</h2>
+            <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-muted-foreground">
+              وصل الدفع قيد المراجعة الآن. سيصلك إشعار داخل المنصة فور اتخاذ القرار.
             </p>
             <Button asChild variant="outline" className="mt-6">
-              <Link to="/contact">تواصل مع الدعم</Link>
+              <Link to="/institution">العودة إلى لوحة المؤسسة</Link>
             </Button>
           </div>
-        ) : (
+        )}
+
+        {showForm && institutionId && (
           <form
             className="card-soft mt-8 space-y-5 p-6"
             onSubmit={(e) => {
               e.preventDefault();
-              setSent(true);
+              mutation.mutate();
             }}
           >
             <h2 className="text-xl">📸 رفع وصل الدفع</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <Label htmlFor="pay-inst">اسم المؤسسة</Label>
-                <Input id="pay-inst" required />
+                <Input id="pay-inst" value={institutionName} readOnly />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="pay-date">تاريخ الدفع</Label>
-                <Input id="pay-date" type="date" required />
+                <Input
+                  id="pay-date"
+                  type="date"
+                  required
+                  value={paidAt}
+                  onChange={(e) => setPaidAt(e.target.value)}
+                />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="pay-amount">المبلغ المدفوع (دج)</Label>
-                <Input id="pay-amount" type="number" defaultValue={9000} required />
+                <Input id="pay-amount" type="number" defaultValue={9000} readOnly />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="pay-method">طريقة الدفع</Label>
-                <Input id="pay-method" defaultValue="CCP" readOnly />
+                <Label htmlFor="pay-ref">مرجع الدفع (اختياري)</Label>
+                <Input
+                  id="pay-ref"
+                  dir="ltr"
+                  placeholder="رقم الوصل أو المرجع"
+                  value={reference}
+                  onChange={(e) => setReference(e.target.value)}
+                />
               </div>
             </div>
 
@@ -156,7 +253,7 @@ function Subscribe() {
                 className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-secondary/30 px-4 py-10 text-center text-sm text-muted-foreground hover:border-primary"
               >
                 <Upload className="h-6 w-6" />
-                <span>{file ?? "اضغط لاختيار صورة الوصل أو ملف PDF"}</span>
+                <span>{file?.name ?? "اضغط لاختيار صورة الوصل أو ملف PDF"}</span>
               </label>
               <Input
                 id="pay-proof"
@@ -164,12 +261,13 @@ function Subscribe() {
                 accept="image/*,application/pdf"
                 required
                 className="sr-only"
-                onChange={(e) => setFile(e.target.files?.[0]?.name ?? null)}
+                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
               />
             </div>
 
-            <Button type="submit" size="lg" className="w-full">
-              إرسال إثبات الدفع
+            <Button type="submit" size="lg" className="w-full" disabled={busy}>
+              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              {busy ? "جارٍ الإرسال…" : "إرسال إثبات الدفع"}
             </Button>
           </form>
         )}
