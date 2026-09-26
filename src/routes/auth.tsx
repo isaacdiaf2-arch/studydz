@@ -39,6 +39,8 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [attempts, setAttempts] = useState(0);
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null);
   const startDemo = useServerFn(startDemoSession);
   const [demoBusy, setDemoBusy] = useState<DemoRoleKey | null>(null);
 
@@ -66,6 +68,13 @@ function AuthPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    if (lockedUntil && Date.now() < lockedUntil) {
+      const wait = Math.ceil((lockedUntil - Date.now()) / 1000);
+      setError(`تم إيقاف المحاولات مؤقتًا. حاول بعد ${wait} ثانية.`);
+      return;
+    }
+
     setLoading(true);
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: email.trim(),
@@ -74,16 +83,28 @@ function AuthPage() {
 
     if (signInError) {
       setLoading(false);
-      const message =
-        signInError.message === "Invalid login credentials"
-          ? "البريد الإلكتروني أو كلمة المرور غير صحيحة."
-          : signInError.message === "Email not confirmed"
-            ? "لم يتم تأكيد البريد الإلكتروني بعد."
-            : `تعذّر تسجيل الدخول: ${signInError.message}`;
-      setError(message);
-      toast.error(message);
+      const nextAttempts = attempts + 1;
+      setAttempts(nextAttempts);
+      if (nextAttempts >= 5) {
+        const until = Date.now() + 60_000;
+        setLockedUntil(until);
+        setAttempts(0);
+        setError("تم تجاوز 5 محاولات فاشلة. تم إيقاف المحاولات لمدة 60 ثانية.");
+      } else {
+        const message =
+          signInError.message === "Invalid login credentials"
+            ? "البريد الإلكتروني أو كلمة المرور غير صحيحة."
+            : signInError.message === "Email not confirmed"
+              ? "لم يتم تأكيد البريد الإلكتروني بعد."
+              : `تعذّر تسجيل الدخول: ${signInError.message}`;
+        setError(message);
+        toast.error(message);
+      }
       return;
     }
+
+    setAttempts(0);
+    setLockedUntil(null);
 
     const destination = search.redirect ?? "/dashboard";
 

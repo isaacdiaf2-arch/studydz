@@ -39,7 +39,9 @@ import {
   ModuleCard,
 } from "@/components/dashboard/DashboardShell";
 
-import { reviewPayment, setInstitutionStatus } from "@/lib/platform.functions";
+import { setInstitutionStatus } from "@/lib/platform.functions";
+import { reviewPaymentWithAudit } from "@/lib/payment.functions";
+import { runSubscriptionExpiry } from "@/lib/subscription-license.functions";
 import { signContractAsPlatform, setContractStatus } from "@/lib/contracts.functions";
 import { CONTRACT_STATUS_LABEL, type ContractStatus } from "@/lib/contracts.shared";
 import { resolvePasswordReset } from "@/lib/auth.functions";
@@ -129,7 +131,8 @@ function AdminDashboard() {
       const { data, error } = await supabase
         .from("institutions")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(200);
       if (error) throw error;
       return data;
     },
@@ -141,7 +144,8 @@ function AdminDashboard() {
       const { data, error } = await supabase
         .from("payments")
         .select("*, institutions(name)")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(200);
       if (error) throw error;
       return data;
     },
@@ -153,7 +157,8 @@ function AdminDashboard() {
       const { data, error } = await supabase
         .from("profiles")
         .select("*, institutions(name)")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(200);
       if (error) throw error;
       return data;
     },
@@ -174,7 +179,8 @@ function AdminDashboard() {
       const { data, error } = await supabase
         .from("contracts")
         .select("*, institutions(name)")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(200);
       if (error) throw error;
       return data;
     },
@@ -258,14 +264,24 @@ function AdminDashboard() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const reviewFn = useServerFn(reviewPayment);
+  const reviewFn = useServerFn(reviewPaymentWithAudit);
   const statusFn = useServerFn(setInstitutionStatus);
+  const expiryFn = useServerFn(runSubscriptionExpiry);
 
   const review = useMutation({
-    mutationFn: (vars: { paymentId: string; decision: "accepted" | "rejected" | "suspended" }) =>
+    mutationFn: (vars: { paymentId: string; decision: "accepted" | "rejected" | "needs_modification"; rejectionReason?: string | null }) =>
       reviewFn({ data: vars }),
     onSuccess: () => {
       toast.success("تم تحديث حالة الدفع.");
+      queryClient.invalidateQueries({ queryKey: ["admin"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const runExpiry = useMutation({
+    mutationFn: () => expiryFn({ data: undefined as never }),
+    onSuccess: (res) => {
+      toast.success(`تم انتهاء ${res.expiredCount} اشتراك منتهي الصلاحية.`);
       queryClient.invalidateQueries({ queryKey: ["admin"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -661,6 +677,17 @@ function AdminDashboard() {
 
       {tab === "subscriptions" && (
         <div className="space-y-3">
+          <div className="flex justify-end">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => runExpiry.mutate()}
+              disabled={runExpiry.isPending}
+            >
+              <CalendarClock className="ms-1 h-4 w-4" />
+              {runExpiry.isPending ? "جارٍ التنفيذ…" : "تنفيذ انتهاء الاشتراكات"}
+            </Button>
+          </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <StatCard
               label="اشتراكات سارية"
@@ -759,9 +786,13 @@ function AdminDashboard() {
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => review.mutate({ paymentId: p.id, decision: "suspended" })}
+                  onClick={() => {
+                    const reason = window.prompt("سبب طلب التعديل:");
+                    if (reason !== null)
+                      review.mutate({ paymentId: p.id, decision: "needs_modification", rejectionReason: reason });
+                  }}
                 >
-                  <PauseCircle className="ms-1 h-4 w-4" /> إيقاف
+                  <AlertTriangle className="ms-1 h-4 w-4" /> طلب تعديل
                 </Button>
               </div>
             </div>

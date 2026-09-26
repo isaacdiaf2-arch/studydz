@@ -68,7 +68,13 @@ export const institutionSignupSchema = z
     lastName: z.string().trim().min(2, "اللقب مطلوب").max(80),
     managerPhone: dzPhone,
     managerEmail: z.string().trim().email("بريد المدير غير صالح").max(255),
-    password: z.string().min(8, "كلمة المرور 8 أحرف على الأقل").max(72),
+    password: z
+      .string()
+      .min(10, "كلمة المرور 10 أحرف على الأقل")
+      .max(72)
+      .regex(/[A-Z]/, "يجب أن تحتوي على حرف كبير واحد على الأقل")
+      .regex(/[a-z]/, "يجب أن تحتوي على حرف صغير واحد على الأقل")
+      .regex(/[0-9]/, "يجب أن تحتوي على رقم واحد على الأقل"),
     confirmPassword: z.string(),
   })
   .refine((v) => v.password === v.confirmPassword, {
