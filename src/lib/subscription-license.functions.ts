@@ -85,6 +85,7 @@ export const verifyInstitutionLicense = createServerFn({ method: "POST" })
     const { data: verifyResult, error } = await supabaseAdmin.rpc("verify_license", {
       _institution_id: data.institutionId,
       _license_key: license.license_key,
+      _installation_id: license.installation_id ?? null,
     });
     if (error) throw new Error(error.message);
 

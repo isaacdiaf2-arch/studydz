@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { useState } from "react";
 import { toast } from "sonner";
-import { Download, ShieldCheck, Server, FileDown } from "lucide-react";
+import { Download, ShieldCheck, Server, FileDown, Terminal, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/dashboard/DashboardShell";
 import { getInstallationInfo } from "@/lib/licenses.functions";
@@ -17,6 +18,7 @@ const STATUS_LABEL: Record<string, string> = {
 export function DownloadCenter() {
   const fetchInfo = useServerFn(getInstallationInfo);
   const info = useQuery({ queryKey: ["installation", "info"], queryFn: () => fetchInfo({ data: undefined }) });
+  const [copied, setCopied] = useState(false);
 
   const data = info.data;
 
@@ -42,6 +44,14 @@ export function DownloadCenter() {
     a.click();
     URL.revokeObjectURL(url);
     toast.success("تم تنزيل ملف التفعيل الخاص بمؤسستك.");
+  }
+
+  function copyInstallCommand() {
+    const cmd = `git clone https://github.com/studydz/on-premise.git\ncd on-premise\ndocker-compose up -d\n./scripts/run-migrations.sh`;
+    navigator.clipboard.writeText(cmd);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    toast.success("تم نسخ أوامر التثبيت.");
   }
 
   if (info.isLoading) return <EmptyState text="جارٍ تحميل بيانات التثبيت…" />;
@@ -86,6 +96,10 @@ export function DownloadCenter() {
               </dd>
             </div>
             <div>
+              <dt className="text-muted-foreground">معرّف التثبيت</dt>
+              <dd className="font-mono text-xs">{data.license.installation_id ?? "—"}</dd>
+            </div>
+            <div>
               <dt className="text-muted-foreground">ينتهي في</dt>
               <dd>{data.license.expires_on ?? "—"}</dd>
             </div>
@@ -128,12 +142,31 @@ export function DownloadCenter() {
           ))}
         </ul>
         <h3 className="mt-5 text-base font-semibold">خطوات التثبيت</h3>
-        <ol className="mt-3 list-decimal space-y-1 pr-5 text-sm text-muted-foreground">
-          <li>ثبّت حزمة خادم Study DZ على جهاز المؤسسة.</li>
-          <li>أنشئ قاعدة بيانات PostgreSQL محلية للمؤسسة.</li>
-          <li>ارفع ملف التفعيل المُنزَّل من هذه الصفحة داخل النسخة المحلية.</li>
-          <li>شغّل النظام داخل الشبكة الداخلية؛ الترخيص يعمل مع مؤسستك فقط.</li>
+        <ol className="mt-3 list-decimal space-y-2 pr-5 text-sm text-muted-foreground">
+          <li>ثبّت Docker و Docker Compose على خادم المؤسسة.</li>
+          <li>حمّل حزمة Study DZ المحلية وافتح المجلد.</li>
+          <li>ضع ملف التفعيل المُنزَّل (license.json) في المجلد الجذري.</li>
+          <li>أنشئ كلمة مرور قاعدة البيانات في secrets/db_password.txt.</li>
+          <li>شغّل الأوامر التالية:</li>
         </ol>
+        <div className="mt-3 rounded-lg bg-secondary/50 p-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Terminal className="h-3.5 w-3.5" />
+              <span>أوامر التثبيت</span>
+            </div>
+            <Button variant="ghost" size="sm" onClick={copyInstallCommand}>
+              {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+            </Button>
+          </div>
+          <pre className="mt-2 overflow-x-auto text-xs leading-5" dir="ltr">
+{`docker-compose up -d
+./scripts/run-migrations.sh`}
+          </pre>
+        </div>
+        <p className="mt-3 text-xs text-muted-foreground">
+          الترخيص مرتبط بمعرّف تثبيت فريد (Installation ID) لا يعمل على أي خادم آخر.
+        </p>
       </section>
     </div>
   );

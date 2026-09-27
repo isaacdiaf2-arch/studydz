@@ -11,10 +11,14 @@ import { SiteHeader } from "@/components/site/SiteHeader";
 import { useServerFn } from "@tanstack/react-start";
 import { startDemoSession } from "@/lib/demo.functions";
 import { DEMO_ACCOUNTS, type DemoRoleKey } from "@/lib/demo.shared";
+import { checkLoginRateLimit, recordLoginAttempt } from "@/lib/rate-limit.functions";
 
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: z.object({ redirect: z.string().optional() }),
+  validateSearch: z.object({
+    redirect: z.string().optional(),
+    blocked: z.enum(["expired", "suspended"]).optional(),
+  }),
   head: () => ({
     meta: [
       { title: "تسجيل الدخول | Study DZ" },
@@ -36,12 +40,20 @@ function AuthPage() {
   const search = useSearch({ from: "/auth" });
   const [email, setEmail] = useState("");
 
+  const blockedMessage = search.blocked
+    ? search.blocked === "expired"
+      ? "انتهى اشتراك مؤسستك. يرجى التجديد عبر صفحة الاشتراك للوصول إلى المنصة."
+      : "تم إيقاف مؤسستك. تواصل مع إدارة المنصة لإعادة التفعيل."
+    : null;
+
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [attempts, setAttempts] = useState(0);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
   const startDemo = useServerFn(startDemoSession);
+  const checkRate = useServerFn(checkLoginRateLimit);
+  const recordAttempt = useServerFn(recordLoginAttempt);
   const [demoBusy, setDemoBusy] = useState<DemoRoleKey | null>(null);
 
   async function handleDemo(role: DemoRoleKey) {
@@ -75,14 +87,30 @@ function AuthPage() {
       return;
     }
 
+    const identifier = email.trim().toLowerCase();
+    try {
+      const rateCheck = await checkRate({ data: { identifier } });
+      if (rateCheck.locked) {
+        const until = Date.now() + (rateCheck.waitSeconds ?? 60) * 1000;
+        setLockedUntil(until);
+        setError("تم تجاوز الحد المسموح من المحاولات الفاشلة. حاول لاحقًا.");
+        return;
+      }
+    } catch {
+      // If rate check fails, proceed with client-side fallback
+    }
+
     setLoading(true);
     const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
+      email: identifier,
       password,
     });
 
     if (signInError) {
       setLoading(false);
+      try {
+        await recordAttempt({ data: { identifier, success: false } });
+      } catch { /* ignore */ }
       const nextAttempts = attempts + 1;
       setAttempts(nextAttempts);
       if (nextAttempts >= 5) {
@@ -103,6 +131,9 @@ function AuthPage() {
       return;
     }
 
+    try {
+      await recordAttempt({ data: { identifier, success: true } });
+    } catch { /* ignore */ }
     setAttempts(0);
     setLockedUntil(null);
 
@@ -148,6 +179,11 @@ function AuthPage() {
           {error && (
             <p role="alert" className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
               {error}
+            </p>
+          )}
+          {blockedMessage && !error && (
+            <p role="alert" className="rounded-md bg-warning/15 px-3 py-2 text-sm text-warning-foreground">
+              {blockedMessage}
             </p>
           )}
           <Button type="submit" className="w-full" disabled={loading}>

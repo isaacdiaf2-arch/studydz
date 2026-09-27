@@ -80,19 +80,26 @@ export const issueLicense = createServerFn({ method: "POST" })
     const end = new Date(start);
     end.setMonth(end.getMonth() + data.months);
 
+    let installationId = data.installationId ?? null;
+    if (!installationId && (data.deployment === "local" || data.deployment === "hybrid")) {
+      const { data: genId, error: genErr } = await supabaseAdmin.rpc("generate_installation_id");
+      if (genErr) throw new Error(genErr.message);
+      installationId = genId as string;
+    }
+
     const { data: row, error } = await supabaseAdmin
       .from("licenses")
       .insert({
         institution_id: data.institutionId,
         license_key: generateKey(),
-        installation_id: data.installationId ?? null,
+        installation_id: installationId,
         deployment: data.deployment,
         status: "active",
         amount: LICENSE_AMOUNT,
         starts_on: start.toISOString().slice(0, 10),
         expires_on: end.toISOString().slice(0, 10),
       })
-      .select("id, license_key")
+      .select("id, license_key, installation_id")
       .single();
     if (error) throw new Error(error.message);
 
@@ -104,10 +111,14 @@ export const issueLicense = createServerFn({ method: "POST" })
       resource: "licenses",
       resource_id: row.id,
       result: "success",
-      metadata: { deployment: data.deployment, months: data.months },
+      metadata: { deployment: data.deployment, months: data.months, installation_id: installationId },
     });
 
-    return { id: row.id as string, licenseKey: row.license_key as string };
+    return {
+      id: row.id as string,
+      licenseKey: row.license_key as string,
+      installationId: (row as any).installation_id as string | null,
+    };
   });
 
 export const setLicenseStatus = createServerFn({ method: "POST" })
