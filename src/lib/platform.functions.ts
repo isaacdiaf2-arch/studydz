@@ -278,56 +278,6 @@ export const sendSupportMessage = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-export const reviewPayment = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) =>
-    z
-      .object({
-        paymentId: z.string().uuid(),
-        decision: z.enum(["accepted", "rejected", "suspended"]),
-      })
-      .parse(data),
-  )
-  .handler(async ({ data, context }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: isAdmin } = await context.supabase
-      .from("user_roles")
-      .select("id")
-      .eq("user_id", context.userId)
-      .eq("role", "platform_admin")
-      .maybeSingle();
-    if (!isAdmin) throw new Error("غير مسموح: مدير المنصة فقط.");
-
-    const expires = new Date();
-    expires.setFullYear(expires.getFullYear() + 1);
-    const expiresAt = expires.toISOString().slice(0, 10);
-
-    const { data: payment, error } = await supabaseAdmin
-      .from("payments")
-      .update({
-        status: data.decision,
-        reviewed_at: new Date().toISOString(),
-        expires_at: data.decision === "accepted" ? expiresAt : null,
-      })
-      .eq("id", data.paymentId)
-      .select("institution_id")
-      .single();
-    if (error) throw new Error(error.message);
-
-    if (data.decision === "accepted") {
-      await supabaseAdmin
-        .from("institutions")
-        .update({ status: "active", subscription_end: expiresAt })
-        .eq("id", payment.institution_id);
-    } else if (data.decision === "suspended") {
-      await supabaseAdmin
-        .from("institutions")
-        .update({ status: "suspended" })
-        .eq("id", payment.institution_id);
-    }
-    return { ok: true };
-  });
-
 export const setInstitutionStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) =>
@@ -353,5 +303,17 @@ export const setInstitutionStatus = createServerFn({ method: "POST" })
       .update({ status: data.status })
       .eq("id", data.institutionId);
     if (error) throw new Error(error.message);
+
+    await supabaseAdmin.from("audit_logs").insert({
+      actor_id: context.userId,
+      actor_role: "platform_admin",
+      institution_id: data.institutionId,
+      action: `institution.status.${data.status}`,
+      resource: "institutions",
+      resource_id: data.institutionId,
+      result: "success",
+      metadata: {} as never,
+    });
+
     return { ok: true };
   });

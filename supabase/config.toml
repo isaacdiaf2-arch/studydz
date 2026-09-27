@@ -1,1 +1,4 @@
 project_id = "pqtxesvckmfwufaigico"
+
+[functions.expire-subscriptions]
+verify_jwt = false
