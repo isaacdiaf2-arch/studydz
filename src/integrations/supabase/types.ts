@@ -439,6 +439,33 @@ export type Database = {
         }
         Relationships: []
       }
+      auth_attempts: {
+        Row: {
+          created_at: string
+          id: string
+          identifier: string
+          ip: string | null
+          kind: string
+          success: boolean
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          identifier: string
+          ip?: string | null
+          kind?: string
+          success?: boolean
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          identifier?: string
+          ip?: string | null
+          kind?: string
+          success?: boolean
+        }
+        Relationships: []
+      }
       change_requests: {
         Row: {
           created_at: string
@@ -1212,6 +1239,30 @@ export type Database = {
           },
         ]
       }
+      login_attempts: {
+        Row: {
+          created_at: string
+          id: string
+          identifier: string
+          ip: string | null
+          success: boolean
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          identifier: string
+          ip?: string | null
+          success?: boolean
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          identifier?: string
+          ip?: string | null
+          success?: boolean
+        }
+        Relationships: []
+      }
       modules: {
         Row: {
           archived: boolean
@@ -1427,6 +1478,8 @@ export type Database = {
           note: string | null
           paid_at: string
           proof_url: string | null
+          reference: string | null
+          rejection_reason: string | null
           reviewed_at: string | null
           status: Database["public"]["Enums"]["payment_status"]
         }
@@ -1440,6 +1493,8 @@ export type Database = {
           note?: string | null
           paid_at?: string
           proof_url?: string | null
+          reference?: string | null
+          rejection_reason?: string | null
           reviewed_at?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
         }
@@ -1453,6 +1508,8 @@ export type Database = {
           note?: string | null
           paid_at?: string
           proof_url?: string | null
+          reference?: string | null
+          rejection_reason?: string | null
           reviewed_at?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
         }
@@ -1476,6 +1533,9 @@ export type Database = {
           institution_id: string | null
           last_name: string
           phone: string | null
+          totp_backup_codes: string[] | null
+          totp_enabled: boolean
+          totp_secret: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -1486,6 +1546,9 @@ export type Database = {
           institution_id?: string | null
           last_name?: string
           phone?: string | null
+          totp_backup_codes?: string[] | null
+          totp_enabled?: boolean
+          totp_secret?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -1496,6 +1559,9 @@ export type Database = {
           institution_id?: string | null
           last_name?: string
           phone?: string | null
+          totp_backup_codes?: string[] | null
+          totp_enabled?: boolean
+          totp_secret?: string | null
         }
         Relationships: [
           {
@@ -1990,6 +2056,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_mfa: {
+        Row: {
+          confirmed_at: string | null
+          created_at: string
+          enabled: boolean
+          last_used_step: number | null
+          recovery_codes: string[]
+          secret: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          confirmed_at?: string | null
+          created_at?: string
+          enabled?: boolean
+          last_used_step?: number | null
+          recovery_codes?: string[]
+          secret: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          confirmed_at?: string | null
+          created_at?: string
+          enabled?: boolean
+          last_used_step?: number | null
+          recovery_codes?: string[]
+          secret?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -2028,6 +2127,15 @@ export type Database = {
     }
     Functions: {
       current_institution: { Args: never; Returns: string }
+      expire_subscriptions: {
+        Args: never
+        Returns: {
+          institution_id: string
+          name: string
+          subscription_end: string
+        }[]
+      }
+      generate_installation_id: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2044,6 +2152,14 @@ export type Database = {
       manages_institution: {
         Args: { _institution_id: string }
         Returns: boolean
+      }
+      verify_license: {
+        Args: {
+          _installation_id?: string
+          _institution_id: string
+          _license_key: string
+        }
+        Returns: Json
       }
     }
     Enums: {
