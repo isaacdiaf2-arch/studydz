@@ -122,8 +122,7 @@ export const reviewPaymentWithAudit = createServerFn({ method: "POST" })
         .update({ status: "active", subscription_end: expiresAt })
         .eq("id", payment.institution_id);
 
-      await supabaseAdmin.from("notifications").insert({
-        recipient_id: null,
+      await notifyInstitutionAdmins(supabaseAdmin, payment.institution_id, {
         institution_id: payment.institution_id,
         sender_id: context.userId,
         type: "payment",
@@ -141,8 +140,7 @@ export const reviewPaymentWithAudit = createServerFn({ method: "POST" })
         })
         .eq("id", data.paymentId);
 
-      await supabaseAdmin.from("notifications").insert({
-        recipient_id: null,
+      await notifyInstitutionAdmins(supabaseAdmin, payment.institution_id, {
         institution_id: payment.institution_id,
         sender_id: context.userId,
         type: "payment",
@@ -167,3 +165,18 @@ export const reviewPaymentWithAudit = createServerFn({ method: "POST" })
 
     return { ok: true as const };
   });
+
+async function notifyInstitutionAdmins(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  admin: any,
+  institutionId: string,
+  payload: Record<string, unknown>,
+) {
+  const { data: admins } = await admin
+    .from("user_roles")
+    .select("user_id")
+    .eq("role", "institution_admin")
+    .eq("institution_id", institutionId);
+  const rows = ((admins ?? []) as { user_id: string }[]).map((a) => ({ ...payload, recipient_id: a.user_id }));
+  if (rows.length) await admin.from("notifications").insert(rows);
+}
