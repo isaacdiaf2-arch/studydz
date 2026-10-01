@@ -47,7 +47,7 @@ export function DownloadCenter() {
   }
 
   function copyInstallCommand() {
-    const cmd = `git clone https://github.com/studydz/on-premise.git\ncd on-premise\ndocker-compose up -d\n./scripts/run-migrations.sh`;
+    const cmd = `# 1. أنشئ كلمة مرور قاعدة البيانات:\nmkdir -p secrets && openssl rand -hex 24 > secrets/db_password.txt\n\n# 2. ضع ملف التفعيل:\ncp /path/to/license.json ./license.json\n\n# 3. أنشئ ملف secrets/app.env بالقيم التالية:\n# SUPABASE_URL=...\n# SUPABASE_ANON_KEY=...\n# SUPABASE_SERVICE_ROLE_KEY=...\n\n# 4. شغّل الخدمات:\ndocker-compose up -d\n\n# 5. طبّق قاعدة البيانات:\n./scripts/run-migrations.sh`;
     navigator.clipboard.writeText(cmd);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);

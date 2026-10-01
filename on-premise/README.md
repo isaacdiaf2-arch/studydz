@@ -24,7 +24,19 @@ This directory contains everything needed to deploy Study DZ on a local server i
    cp /path/to/license.json ./license.json
    ```
 
-3. **Start the services:**
+3. **Create the app secrets file:**
+   ```bash
+   cat > secrets/app.env <<EOF
+   SUPABASE_URL=https://your-project.supabase.co
+   SUPABASE_ANON_KEY=your-anon-key
+   SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+   EOF
+   chmod 600 secrets/app.env
+   ```
+   For a fully self-hosted deployment (no Supabase), run your own PostgREST and
+   leave these values pointing at your local server.
+
+4. **Start the services:**
    ```bash
    docker-compose up -d
    ```

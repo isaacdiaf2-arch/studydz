@@ -32,16 +32,19 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    env_file:
+      - ./secrets/app.env
     environment:
-      DATABASE_URL: postgres://studydz:studydz@db:5432/studydz
       NODE_ENV: production
       PORT: 3000
+    secrets:
+      - db_password
     ports:
       - "3000:3000"
     volumes:
       - ./license.json:/app/license.json:ro
       - ./data:/app/data
-    command: ["node", ".output/server/index.mjs"]
+    command: ["sh", "-c", "export DATABASE_URL=postgres://studydz:$$(cat /run/secrets/db_password)@db:5432/studydz && node .output/server/index.mjs"]
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:3000/health || exit 1"]
       interval: 15s

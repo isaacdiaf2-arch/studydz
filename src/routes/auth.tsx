@@ -6,13 +6,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { useServerFn } from "@tanstack/react-start";
 import { startDemoSession } from "@/lib/demo.functions";
 import { DEMO_ACCOUNTS, type DemoRoleKey } from "@/lib/demo.shared";
 import { checkLoginRateLimit, recordLoginAttempt } from "@/lib/rate-limit.functions";
-
+import { checkTotpStatus, verifyTotp } from "@/lib/totp.functions";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: z.object({
@@ -35,10 +35,27 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+type Step = "credentials" | "totp";
+
 function AuthPage() {
   const navigate = useNavigate();
   const search = useSearch({ from: "/auth" });
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [attempts, setAttempts] = useState(0);
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null);
+  const [step, setStep] = useState<Step>("credentials");
+  const [totpCode, setTotpCode] = useState("");
+  const [totpLoading, setTotpLoading] = useState(false);
+
+  const startDemo = useServerFn(startDemoSession);
+  const checkRate = useServerFn(checkLoginRateLimit);
+  const recordAttempt = useServerFn(recordLoginAttempt);
+  const checkTotp = useServerFn(checkTotpStatus);
+  const doVerifyTotp = useServerFn(verifyTotp);
+  const [demoBusy, setDemoBusy] = useState<DemoRoleKey | null>(null);
 
   const blockedMessage = search.blocked
     ? search.blocked === "expired"
@@ -46,15 +63,7 @@ function AuthPage() {
       : "تم إيقاف مؤسستك. تواصل مع إدارة المنصة لإعادة التفعيل."
     : null;
 
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [attempts, setAttempts] = useState(0);
-  const [lockedUntil, setLockedUntil] = useState<number | null>(null);
-  const startDemo = useServerFn(startDemoSession);
-  const checkRate = useServerFn(checkLoginRateLimit);
-  const recordAttempt = useServerFn(recordLoginAttempt);
-  const [demoBusy, setDemoBusy] = useState<DemoRoleKey | null>(null);
+  const destination = search.redirect ?? "/dashboard";
 
   async function handleDemo(role: DemoRoleKey) {
     setError(null);
@@ -77,7 +86,7 @@ function AuthPage() {
     }
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleCredentials(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
 
@@ -96,9 +105,7 @@ function AuthPage() {
         setError("تم تجاوز الحد المسموح من المحاولات الفاشلة. حاول لاحقًا.");
         return;
       }
-    } catch {
-      // If rate check fails, proceed with client-side fallback
-    }
+    } catch { /* fallback to client-side check */ }
 
     setLoading(true);
     const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -108,14 +115,11 @@ function AuthPage() {
 
     if (signInError) {
       setLoading(false);
-      try {
-        await recordAttempt({ data: { identifier, success: false } });
-      } catch { /* ignore */ }
+      try { await recordAttempt({ data: { identifier, success: false } }); } catch { /* ignore */ }
       const nextAttempts = attempts + 1;
       setAttempts(nextAttempts);
       if (nextAttempts >= 5) {
-        const until = Date.now() + 60_000;
-        setLockedUntil(until);
+        setLockedUntil(Date.now() + 60_000);
         setAttempts(0);
         setError("تم تجاوز 5 محاولات فاشلة. تم إيقاف المحاولات لمدة 60 ثانية.");
       } else {
@@ -131,20 +135,98 @@ function AuthPage() {
       return;
     }
 
-    try {
-      await recordAttempt({ data: { identifier, success: true } });
-    } catch { /* ignore */ }
+    try { await recordAttempt({ data: { identifier, success: true } }); } catch { /* ignore */ }
     setAttempts(0);
     setLockedUntil(null);
 
-    const destination = search.redirect ?? "/dashboard";
-
+    // Check if user has 2FA enabled
+    try {
+      const totpStatus = await checkTotp({ data: undefined });
+      if (totpStatus.enabled) {
+        setLoading(false);
+        setStep("totp");
+        return;
+      }
+    } catch { /* if check fails, proceed to dashboard */ }
 
     setLoading(false);
     navigate({ to: destination });
   }
 
+  async function handleTotpSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (totpCode.length !== 6) return;
+    setError(null);
+    setTotpLoading(true);
 
+    try {
+      const result = await doVerifyTotp({ data: { code: totpCode } });
+      if (!result.required || result.verified) {
+        navigate({ to: destination });
+      } else {
+        setError("رمز التحقق غير صحيح أو منتهي الصلاحية. حاول مرة أخرى.");
+        setTotpCode("");
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "تعذّر التحقق. حاول مرة أخرى.";
+      setError(msg);
+      setTotpCode("");
+    } finally {
+      setTotpLoading(false);
+    }
+  }
+
+  async function handleSignOutAndBack() {
+    await supabase.auth.signOut();
+    setStep("credentials");
+    setTotpCode("");
+    setError(null);
+  }
+
+  if (step === "totp") {
+    return (
+      <div className="min-h-screen">
+        <SiteHeader />
+        <main className="mx-auto flex max-w-md flex-col justify-center px-4 py-20 sm:px-6">
+          <h1 className="text-3xl">التحقق بخطوتين</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            أدخل الرمز المكوّن من 6 أرقام من تطبيق المصادقة الخاص بك.
+          </p>
+          <form className="mt-8 space-y-5" onSubmit={handleTotpSubmit}>
+            <div className="flex justify-center">
+              <InputOTP
+                maxLength={6}
+                value={totpCode}
+                onChange={setTotpCode}
+                dir="ltr"
+              >
+                <InputOTPGroup>
+                  {[0, 1, 2, 3, 4, 5].map((i) => (
+                    <InputOTPSlot key={i} index={i} />
+                  ))}
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
+            {error && (
+              <p role="alert" className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                {error}
+              </p>
+            )}
+            <Button type="submit" className="w-full" disabled={totpLoading || totpCode.length !== 6}>
+              {totpLoading ? "جارٍ التحقق…" : "تأكيد الرمز"}
+            </Button>
+          </form>
+          <button
+            type="button"
+            onClick={handleSignOutAndBack}
+            className="mt-4 text-center text-sm text-muted-foreground underline"
+          >
+            العودة وتسجيل الدخول بحساب آخر
+          </button>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -153,7 +235,7 @@ function AuthPage() {
         <h1 className="text-3xl">تسجيل الدخول</h1>
         <p className="mt-2 text-sm text-muted-foreground">أدخل بيانات حسابك للمتابعة</p>
 
-        <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-5" onSubmit={handleCredentials}>
           <div className="grid gap-2">
             <Label htmlFor="email">البريد الإلكتروني</Label>
             <Input
@@ -182,7 +264,7 @@ function AuthPage() {
             </p>
           )}
           {blockedMessage && !error && (
-            <p role="alert" className="rounded-md bg-warning/15 px-3 py-2 text-sm text-warning-foreground">
+            <p role="alert" className="rounded-md bg-amber-100 px-3 py-2 text-sm text-amber-900 dark:bg-amber-900/20 dark:text-amber-200">
               {blockedMessage}
             </p>
           )}
@@ -190,7 +272,6 @@ function AuthPage() {
             {loading ? "جارٍ الدخول…" : "دخول"}
           </Button>
         </form>
-
 
         <p className="mt-4 text-center text-sm">
           <Link to="/forgot-password" className="font-semibold text-foreground underline">
@@ -236,7 +317,6 @@ function AuthPage() {
             ))}
           </div>
         </section>
-
       </main>
     </div>
   );
