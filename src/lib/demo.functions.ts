@@ -68,6 +68,12 @@ export const startDemoSession = createServerFn({ method: "POST" })
       const account = DEMO_ACCOUNTS[key];
       let user = users.find((u) => (u.email ?? "").toLowerCase() === account.email);
       if (!user) {
+        // Remove a stale profile left behind by a deleted demo account.
+        await supabaseAdmin.from("user_roles").delete().in(
+          "user_id",
+          ((await supabaseAdmin.from("profiles").select("id").eq("email", account.email)).data ?? []).map((r) => r.id),
+        );
+        await supabaseAdmin.from("profiles").delete().eq("email", account.email);
         const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
           email: account.email,
           password: account.password,
