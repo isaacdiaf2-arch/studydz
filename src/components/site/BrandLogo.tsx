@@ -95,8 +95,8 @@ export function BrandLogo({
           Study DZ
         </button>
         {subtitle && (
-          <span className="block text-xs leading-snug text-muted-foreground">
-            نظام تشغيل رقمي للمؤسسات التعليمية والتكوينية في الجزائر
+          <span className="block truncate text-xs text-muted-foreground">
+            منصة تعليمية جزائرية
           </span>
         )}
       </span>
