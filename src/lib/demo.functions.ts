@@ -74,7 +74,10 @@ export const startDemoSession = createServerFn({ method: "POST" })
           email_confirm: true,
           user_metadata: { first_name: account.firstName, last_name: account.lastName },
         });
-        if (error || !created.user) throw new Error("تعذّر تجهيز الحساب التجريبي.");
+        if (error || !created.user) {
+          console.error("demo createUser failed", error);
+          throw new Error("تعذّر تجهيز الحساب التجريبي.");
+        }
         user = created.user;
       } else {
         await supabaseAdmin.auth.admin.updateUserById(user.id, {
