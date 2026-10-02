@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -12,6 +12,9 @@ import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { submitTrialRequest } from "@/lib/inbound.functions";
 import { trialRequestSchema } from "@/lib/inbound.shared";
+import { startDemoSession } from "@/lib/demo.functions";
+import { DEMO_ACCOUNTS, type DemoRoleKey } from "@/lib/demo.shared";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/trial")({
   head: () => ({
@@ -38,6 +41,27 @@ function TrialPage() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const send = useServerFn(submitTrialRequest);
+  const startDemo = useServerFn(startDemoSession);
+  const navigate = useNavigate();
+  const [demoBusy, setDemoBusy] = useState<DemoRoleKey | null>(null);
+
+  async function enterTrial(role: DemoRoleKey) {
+    setDemoBusy(role);
+    try {
+      const account = await startDemo({ data: { role } });
+      const { error: signErr } = await supabase.auth.signInWithPassword({
+        email: account.email,
+        password: account.password,
+      });
+      if (signErr) throw new Error(signErr.message);
+      toast.success(`تم الدخول إلى التجربة: ${DEMO_ACCOUNTS[role].label}`);
+      navigate({ to: "/dashboard" });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "تعذّر الدخول إلى التجربة.");
+    } finally {
+      setDemoBusy(null);
+    }
+  }
 
   const mutation = useMutation({
     mutationFn: send,
@@ -90,6 +114,23 @@ function TrialPage() {
           لمدة <strong className="text-foreground">24 ساعة</strong> فقط، ثم يمكنك الاشتراك السنوي
           للاستمرار.
         </p>
+
+        <section className="card-soft mt-8 p-6">
+          <h2 className="text-xl">ادخل إلى التجربة الآن</h2>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            {(Object.keys(DEMO_ACCOUNTS) as DemoRoleKey[]).map((role) => (
+              <Button
+                key={role}
+                variant="outline"
+                disabled={demoBusy !== null}
+                onClick={() => enterTrial(role)}
+              >
+                {demoBusy === role ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                {DEMO_ACCOUNTS[role].label}
+              </Button>
+            ))}
+          </div>
+        </section>
 
         {sent ? (
           <div className="card-soft mt-8 p-8 text-center">
