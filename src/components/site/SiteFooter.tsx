@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import logo from "@/assets/studydz-logo.png.asset.json";
+import logo from "@/assets/studydz-logo-st.png.asset.json";
 
 
 export function SiteFooter() {
@@ -8,7 +8,7 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-3">
         <div>
           <div className="flex items-center gap-2">
-            <img src={logo.url} alt="شعار Study DZ" className="h-11 w-11 object-contain" />
+            <img src={logo.url} alt="شعار Study DZ" className="h-11 w-11 rounded-xl object-contain" />
             <span className="font-display text-lg font-extrabold">Study DZ</span>
           </div>
           <p className="mt-3 max-w-sm text-sm leading-7 text-muted-foreground">

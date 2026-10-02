@@ -10,7 +10,6 @@ import {
 } from "@/lib/signup.functions";
 import {
   INSTITUTION_TYPES,
-  WILAYAS,
   institutionSignupSchema,
   type InstitutionSignupInput,
 } from "@/lib/signup.shared";
@@ -51,6 +50,7 @@ const emptyForm: InstitutionSignupInput = {
   foundedOn: "",
   wilaya: "",
   commune: "",
+  daira: "",
   address: "",
   mapsUrl: "",
   phone: "",
@@ -233,7 +233,8 @@ function RegisterPage() {
                 />
                 <Field
                   id="accreditationNumber"
-                  label="رقم الاعتماد — اختياري"
+                  label="رقم الاعتماد"
+                  required
                   dir="ltr"
                   value={form.accreditationNumber ?? ""}
                   onChange={(v) => set("accreditationNumber", v)}
@@ -241,14 +242,16 @@ function RegisterPage() {
                 />
                 <Field
                   id="accreditationAuthority"
-                  label="جهة الاعتماد — اختياري"
+                  label="جهة الاعتماد"
+                  required
                   value={form.accreditationAuthority ?? ""}
                   onChange={(v) => set("accreditationAuthority", v)}
                   error={errors["accreditationAuthority"]}
                 />
                 <Field
                   id="commercialRegister"
-                  label="رقم السجل التجاري — اختياري"
+                  label="رقم السجل التجاري"
+                  required
                   dir="ltr"
                   value={form.commercialRegister ?? ""}
                   onChange={(v) => set("commercialRegister", v)}
@@ -272,21 +275,22 @@ function RegisterPage() {
             <section className="card-soft p-6">
               <h2 className="text-xl">الموقع ومعلومات التواصل</h2>
               <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                <div className="grid gap-2">
-                  <Label htmlFor="wilaya">الولاية</Label>
-                  <select
-                    id="wilaya"
-                    value={form.wilaya}
-                    onChange={(e) => set("wilaya", e.target.value)}
-                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                  >
-                    <option value="">اختر الولاية…</option>
-                    {WILAYAS.map((w) => (
-                      <option key={w}>{w}</option>
-                    ))}
-                  </select>
-                  {errors["wilaya"] && <ErrorText>{errors["wilaya"]}</ErrorText>}
-                </div>
+                <Field
+                  id="wilaya"
+                  label="الولاية"
+                  required
+                  value={form.wilaya}
+                  onChange={(v) => set("wilaya", v)}
+                  error={errors["wilaya"]}
+                />
+                <Field
+                  id="daira"
+                  label="الدائرة"
+                  required
+                  value={form.daira ?? ""}
+                  onChange={(v) => set("daira", v)}
+                  error={errors["daira"]}
+                />
                 <Field
                   id="commune"
                   label="البلدية"

@@ -38,7 +38,7 @@ function Home() {
     <div className="min-h-screen">
       <SiteHeader />
 
-      <section className="relative overflow-hidden border-b border-border bg-cream">
+      <section className="relative overflow-hidden border-b border-border bg-background">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
           <span className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-4 py-1.5 text-xs font-semibold text-foreground">
             منصة سحابية جزائرية · نظام SaaS متعدد المؤسسات

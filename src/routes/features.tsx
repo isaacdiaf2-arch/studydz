@@ -212,29 +212,6 @@ function Features() {
           ))}
         </div>
 
-        <h2 className="mt-16 text-3xl">لوحة تحكم خاصة لكل مستخدم</h2>
-        <p className="mt-3 max-w-2xl text-muted-foreground">
-          صلاحيات دقيقة تمنع أي تداخل بين المؤسسات أو بين الأقسام.
-        </p>
-        <div className="mt-8 grid gap-6 md:grid-cols-3">
-          {roles.map((r) => (
-            <article key={r.title} className="card-soft p-6">
-              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-primary text-primary-foreground">
-                <r.icon className="h-6 w-6" />
-              </span>
-              <h3 className="mt-4 text-xl">{r.title}</h3>
-              <ul className="mt-4 space-y-2.5">
-                {r.items.map((i) => (
-                  <li key={i} className="flex gap-2 text-sm leading-6 text-muted-foreground">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                    <span>{i}</span>
-                  </li>
-                ))}
-              </ul>
-            </article>
-          ))}
-        </div>
-
         <h2 className="mt-16 text-3xl">📚 نظام المواد والتخصصات</h2>
         <p className="mt-3 max-w-2xl text-muted-foreground">
           المنصة مهيأة لبرنامج التعليم الجزائري، والأستاذ يرى فقط المادة أو القسم المرتبط به.
