@@ -68,13 +68,22 @@ export const startDemoSession = createServerFn({ method: "POST" })
       const account = DEMO_ACCOUNTS[key];
       let user = users.find((u) => (u.email ?? "").toLowerCase() === account.email);
       if (!user) {
+        // Remove a stale profile left behind by a deleted demo account.
+        await supabaseAdmin.from("user_roles").delete().in(
+          "user_id",
+          ((await supabaseAdmin.from("profiles").select("id").eq("email", account.email)).data ?? []).map((r) => r.id),
+        );
+        await supabaseAdmin.from("profiles").delete().eq("email", account.email);
         const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
           email: account.email,
           password: account.password,
           email_confirm: true,
           user_metadata: { first_name: account.firstName, last_name: account.lastName },
         });
-        if (error || !created.user) throw new Error("تعذّر تجهيز الحساب التجريبي.");
+        if (error || !created.user) {
+          console.error("demo createUser failed", error);
+          throw new Error("تعذّر تجهيز الحساب التجريبي.");
+        }
         user = created.user;
       } else {
         await supabaseAdmin.auth.admin.updateUserById(user.id, {

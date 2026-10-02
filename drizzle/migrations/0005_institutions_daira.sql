@@ -1,0 +1,1 @@
+ALTER TABLE public.institutions ADD COLUMN IF NOT EXISTS daira text;

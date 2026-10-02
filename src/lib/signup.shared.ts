@@ -42,9 +42,9 @@ export const institutionSignupSchema = z
     name: z.string().trim().min(2, "اسم المؤسسة بالعربية مطلوب").max(150),
     nameFr: optionalText(150),
     type: z.string().trim().min(2, "نوع المؤسسة مطلوب").max(80),
-    accreditationNumber: optionalText(80),
-    commercialRegister: optionalText(80),
-    accreditationAuthority: optionalText(150),
+    accreditationNumber: z.string().trim().min(1, "رقم الاعتماد مطلوب").max(80),
+    commercialRegister: z.string().trim().min(1, "رقم السجل التجاري مطلوب").max(80),
+    accreditationAuthority: z.string().trim().min(2, "جهة الاعتماد مطلوبة").max(150),
     foundedOn: z
       .string()
       .trim()
@@ -55,6 +55,7 @@ export const institutionSignupSchema = z
     // الموقع
     wilaya: z.string().trim().min(1, "الولاية مطلوبة").max(80),
     commune: z.string().trim().min(1, "البلدية مطلوبة").max(80),
+    daira: z.string().trim().min(1, "الدائرة مطلوبة").max(80),
     address: z.string().trim().min(3, "العنوان مطلوب").max(250),
     mapsUrl: optionalUrl,
     // التواصل

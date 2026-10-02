@@ -928,6 +928,7 @@ export type Database = {
           commune: string
           cover_url: string | null
           created_at: string
+          daira: string | null
           email: string
           facebook_url: string | null
           founded_on: string | null
@@ -961,6 +962,7 @@ export type Database = {
           commune: string
           cover_url?: string | null
           created_at?: string
+          daira?: string | null
           email: string
           facebook_url?: string | null
           founded_on?: string | null
@@ -994,6 +996,7 @@ export type Database = {
           commune?: string
           cover_url?: string | null
           created_at?: string
+          daira?: string | null
           email?: string
           facebook_url?: string | null
           founded_on?: string | null

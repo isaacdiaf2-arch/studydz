@@ -55,6 +55,7 @@ export const registerInstitutionAccount = createServerFn({ method: "POST" })
         type: data.type,
         wilaya: data.wilaya,
         commune: data.commune,
+        daira: data.daira,
         address: data.address,
         maps_url: data.mapsUrl,
         phone: data.phone,
