@@ -10,6 +10,7 @@
  */
 
 @theme inline {
+  --color-cream: oklch(0.95 0.015 85);
   --font-sans: "Tajawal", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Cairo", ui-sans-serif, system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);

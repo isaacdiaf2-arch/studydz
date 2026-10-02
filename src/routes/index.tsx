@@ -38,13 +38,13 @@ function Home() {
     <div className="min-h-screen">
       <SiteHeader />
 
-      <section className="surface-hero relative overflow-hidden border-b border-border">
+      <section className="relative overflow-hidden border-b border-border bg-cream">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
           <span className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-4 py-1.5 text-xs font-semibold text-foreground">
             منصة سحابية جزائرية · نظام SaaS متعدد المؤسسات
           </span>
           <h1 className="mt-6 max-w-3xl text-4xl leading-[1.25] sm:text-5xl lg:text-6xl">
-            منصة <span className="text-gold">SaaS</span> لإدارة المؤسسات التعليمية الجزائرية
+            نظام تشغيل رقمي للمؤسسات التعليمية والتكوينية في الجزائر
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-8 text-muted-foreground sm:text-lg">
             Study DZ منصة موجّهة للمدارس الخاصة، مراكز الدعم، المعاهد ومراكز التكوين المهني في
