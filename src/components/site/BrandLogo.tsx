@@ -14,7 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import logo from "@/assets/studydz-logo-st.png.asset.json";
+import logo from "@/assets/studydz-logo-sd.png.asset.json";
 
 export function BrandLogo({
   size = "md",
