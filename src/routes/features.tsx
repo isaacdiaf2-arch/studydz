@@ -152,29 +152,7 @@ function Features() {
     <div className="min-h-screen">
       <SiteHeader />
       <main className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <h1 className="text-4xl">المميزات الأساسية</h1>
-        <p className="mt-3 max-w-2xl text-muted-foreground">
-          نظام SaaS متعدد المؤسسات: كل مؤسسة لها مساحة مستقلة تمامًا داخل نفس النظام، مع دعم كامل
-          للغة العربية وواجهة بسيطة جدًا.
-        </p>
-
-        <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {groups.map((g) => (
-            <article key={g.title} className="card-soft p-6">
-              <span className="grid h-11 w-11 place-items-center rounded-2xl bg-secondary text-secondary-foreground">
-                <g.icon className="h-5 w-5" />
-              </span>
-              <h2 className="mt-4 text-lg">{g.title}</h2>
-              <ul className="mt-3 space-y-2 text-sm leading-6 text-muted-foreground">
-                {g.items.map((i) => (
-                  <li key={i}>✅ {i}</li>
-                ))}
-              </ul>
-            </article>
-          ))}
-        </div>
-
-        <h2 className="mt-16 text-3xl">📚 نظام المواد والتخصصات</h2>
+        <h1 className="text-4xl">📚 نظام المواد والتخصصات</h1>
         <p className="mt-3 max-w-2xl text-muted-foreground">
           المنصة مهيأة لبرنامج التعليم الجزائري، والأستاذ يرى فقط المادة أو القسم المرتبط به.
         </p>
@@ -187,16 +165,6 @@ function Features() {
           ))}
         </div>
 
-        <h2 className="mt-16 text-3xl">فوائد المؤسسات</h2>
-        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {benefits.map((f) => (
-            <article key={f.t} className="card-soft p-6">
-              <f.icon className="h-6 w-6 text-primary" />
-              <h3 className="mt-4 text-base">{f.t}</h3>
-              <p className="mt-2 text-sm leading-7 text-muted-foreground">{f.d}</p>
-            </article>
-          ))}
-        </div>
 
         <div className="mt-14 grid gap-6 md:grid-cols-3">
           {[
