@@ -80,7 +80,7 @@ export function BrandLogo({
         <img
           src={logo.url}
           alt="شعار منصة Study DZ"
-          className={`${box} rounded-xl bg-[#EFEAE1] object-contain`}
+          className={`${box} rounded-xl bg-background object-contain`}
           width={44}
           height={44}
         />
