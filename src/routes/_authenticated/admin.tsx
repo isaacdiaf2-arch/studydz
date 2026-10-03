@@ -55,6 +55,7 @@ import {
   InvoicesPanel,
 } from "@/components/dashboard/AdminGovernance";
 import { LicensesPanel } from "@/components/dashboard/LicensesPanel";
+import { TotpSettings } from "@/components/dashboard/TotpSettings";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminDashboard,
@@ -77,6 +78,7 @@ const nav = [
   { key: "audit", label: "سجل التدقيق", icon: Database },
   { key: "activity", label: "سجل العمليات", icon: Activity },
   { key: "preview", label: "معاينة اللوحات", icon: MonitorSmartphone },
+  { key: "security", label: "الأمان و 2FA", icon: ShieldCheck },
   { key: "support", label: "الدعم", icon: LifeBuoy },
 ];
 
@@ -1119,6 +1121,8 @@ function AdminDashboard() {
           ))}
         </div>
       )}
+
+      {tab === "security" && <TotpSettings />}
     </DashboardShell>
   );
 }
