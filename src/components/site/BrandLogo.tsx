@@ -94,11 +94,6 @@ export function BrandLogo({
         >
           Study DZ
         </button>
-        {subtitle && (
-          <span className="block truncate text-xs text-muted-foreground">
-            منصة تعليمية جزائرية
-          </span>
-        )}
       </span>
 
       <Dialog open={open} onOpenChange={setOpen}>

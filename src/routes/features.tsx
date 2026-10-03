@@ -3,30 +3,11 @@ import {
   School,
   GraduationCap,
   Users,
-  ShieldCheck,
-  MessageSquare,
-  Wallet,
-  BarChart3,
-  BookOpen,
-  CheckCircle2,
-  ClipboardCheck,
-  Smartphone,
-  CloudDownload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 
-const benefits = [
-  { icon: BookOpen, t: "محتوى تعليمي غني", d: "دروس فيديو، ملفات PDF، عروض تقديمية ومكتبة تعليمية." },
-  { icon: ClipboardCheck, t: "اختبارات إلكترونية", d: "اختيار من متعدد، صح/خطأ وإجابة قصيرة مع تصحيح تلقائي وتوقيت." },
-  { icon: BarChart3, t: "تقارير ذكية", d: "نسبة إنجاز الدروس، المتوسطات، نقاط القوة والضعف وتقرير شهري." },
-  { icon: ShieldCheck, t: "أمان وعزل البيانات", d: "نظام متعدد المؤسسات: كل مؤسسة ترى بياناتها فقط، مع سجل عمليات ونسخ احتياطية." },
-  { icon: Smartphone, t: "متجاوب 100%", d: "واجهة مهيأة للهواتف واللوحيات والحواسيب بدعم كامل للعربية." },
-  { icon: CloudDownload, t: "عمل دون اتصال", d: "تحميل الدروس للمطالعة دون إنترنت مع مزامنة عند عودة الاتصال." },
-  { icon: MessageSquare, t: "تواصل مباشر", d: "رسائل بين الإدارة والأستاذ والطالب، وأسئلة تحت كل درس." },
-  { icon: Wallet, t: "إدارة مالية", d: "اشتراك المؤسسة، رسوم الطلاب، الفواتير وسجل المدفوعات." },
-];
 
 
 export const Route = createFileRoute("/features")({
@@ -48,76 +29,6 @@ export const Route = createFileRoute("/features")({
   component: Features,
 });
 
-const groups = [
-  {
-    icon: School,
-    title: "🏫 إدارة المؤسسة",
-    items: [
-      "إدارة الطلاب والأساتذة",
-      "إدارة الأقسام والمواد",
-      "إدارة السنوات الدراسية",
-      "إدارة الجداول",
-      "إدارة الحضور والغياب",
-      "إدارة النتائج والإعلانات",
-      "إدارة الاشتراك السنوي",
-      "تحويل الطلاب بين المؤسسات",
-    ],
-  },
-  {
-    icon: BookOpen,
-    title: "📚 التعليم",
-    items: [
-      "دروس فيديو",
-      "ملفات PDF وعروض تقديمية",
-      "واجبات منزلية",
-      "اختبارات إلكترونية",
-      "تصحيح تلقائي للاختبارات الموضوعية",
-      "بنك أسئلة",
-      "مكتبة تعليمية",
-    ],
-  },
-  {
-    icon: BarChart3,
-    title: "📈 متابعة الطالب",
-    items: [
-      "نسبة إنجاز الدروس",
-      "سجل الاختبارات",
-      "سجل الحضور",
-      "متوسطات الطالب",
-      "نقاط القوة والضعف",
-      "تقرير تقدم شهري",
-    ],
-  },
-  {
-    icon: MessageSquare,
-    title: "💬 التواصل",
-    items: [
-      "رسائل بين الأستاذ والطالب",
-      "رسائل بين الإدارة والأستاذ",
-      "رسائل بين الإدارة والطالب",
-      "إشعارات فورية",
-      "قسم للأسئلة تحت كل درس",
-    ],
-  },
-  {
-    icon: Wallet,
-    title: "💰 الإدارة المالية",
-    items: ["اشتراك المؤسسة", "رسوم الطلاب", "الفواتير", "سجل المدفوعات", "تقارير مالية"],
-  },
-  {
-    icon: ShieldCheck,
-    title: "🔒 الأمان",
-    items: [
-      "صلاحيات متعددة لكل نوع مستخدم",
-      "تشفير كلمات المرور والبيانات",
-      "منع الأستاذ من رؤية بيانات مؤسسات أخرى",
-      "سجل العمليات",
-      "نسخ احتياطية",
-      "رمز تفعيل يُستعمل مرة واحدة فقط",
-      "نظام استرجاع الحساب",
-    ],
-  },
-];
 
 const levels = [
   {
@@ -152,29 +63,7 @@ function Features() {
     <div className="min-h-screen">
       <SiteHeader />
       <main className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <h1 className="text-4xl">المميزات الأساسية</h1>
-        <p className="mt-3 max-w-2xl text-muted-foreground">
-          نظام SaaS متعدد المؤسسات: كل مؤسسة لها مساحة مستقلة تمامًا داخل نفس النظام، مع دعم كامل
-          للغة العربية وواجهة بسيطة جدًا.
-        </p>
-
-        <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {groups.map((g) => (
-            <article key={g.title} className="card-soft p-6">
-              <span className="grid h-11 w-11 place-items-center rounded-2xl bg-secondary text-secondary-foreground">
-                <g.icon className="h-5 w-5" />
-              </span>
-              <h2 className="mt-4 text-lg">{g.title}</h2>
-              <ul className="mt-3 space-y-2 text-sm leading-6 text-muted-foreground">
-                {g.items.map((i) => (
-                  <li key={i}>✅ {i}</li>
-                ))}
-              </ul>
-            </article>
-          ))}
-        </div>
-
-        <h2 className="mt-16 text-3xl">📚 نظام المواد والتخصصات</h2>
+        <h1 className="text-4xl">📚 نظام المواد والتخصصات</h1>
         <p className="mt-3 max-w-2xl text-muted-foreground">
           المنصة مهيأة لبرنامج التعليم الجزائري، والأستاذ يرى فقط المادة أو القسم المرتبط به.
         </p>
@@ -187,16 +76,6 @@ function Features() {
           ))}
         </div>
 
-        <h2 className="mt-16 text-3xl">فوائد المؤسسات</h2>
-        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {benefits.map((f) => (
-            <article key={f.t} className="card-soft p-6">
-              <f.icon className="h-6 w-6 text-primary" />
-              <h3 className="mt-4 text-base">{f.t}</h3>
-              <p className="mt-2 text-sm leading-7 text-muted-foreground">{f.d}</p>
-            </article>
-          ))}
-        </div>
 
         <div className="mt-14 grid gap-6 md:grid-cols-3">
           {[
