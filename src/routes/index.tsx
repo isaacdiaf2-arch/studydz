@@ -40,17 +40,9 @@ function Home() {
 
       <section className="relative overflow-hidden border-b border-border bg-background">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
-          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-4 py-1.5 text-xs font-semibold text-foreground">
-            منصة سحابية جزائرية · نظام SaaS متعدد المؤسسات
-          </span>
-          <h1 className="mt-6 max-w-3xl text-4xl leading-[1.25] sm:text-5xl lg:text-6xl">
+          <h1 className="max-w-3xl text-4xl leading-[1.25] sm:text-5xl lg:text-6xl">
             نظام تشغيل رقمي للمؤسسات التعليمية والتكوينية في الجزائر
           </h1>
-          <p className="mt-5 max-w-2xl text-base leading-8 text-muted-foreground sm:text-lg">
-            Study DZ نظام تشغيل رقمي موجّه للمؤسسات التعليمية والتكوينية في الجزائر، يوفّر إدارة
-            موحّدة للمؤسسة وفروعها وبرامجها وأقسامها، مع إدارة الأساتذة والطلبة والمتربصين والحضور
-            والتقييمات والنتائج والجداول والدروس.
-          </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg">
               <Link to="/register">
