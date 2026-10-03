@@ -3,15 +3,6 @@ import {
   School,
   GraduationCap,
   Users,
-  ShieldCheck,
-  MessageSquare,
-  Wallet,
-  BarChart3,
-  BookOpen,
-  CheckCircle2,
-  ClipboardCheck,
-  Smartphone,
-  CloudDownload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/site/SiteHeader";
