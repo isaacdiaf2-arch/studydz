@@ -53,7 +53,7 @@ function Subscribe() {
   const [sent, setSent] = useState(false);
 
   const institutionId = account.data?.profile?.institution_id as string | undefined;
-  const institutionName = account.data?.institution?.name ?? "—";
+  const [instName, setInstName] = useState("");
 
   const existingPayments = useQuery({
     queryKey: ["subscribe", "payments", institutionId],
@@ -89,6 +89,7 @@ function Subscribe() {
           paidAt,
           amount: 9000,
           reference: reference.trim() || null,
+          institutionName: instName.trim(),
           proofPath: path,
         },
       });
@@ -218,7 +219,14 @@ function Subscribe() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <Label htmlFor="pay-inst">اسم المؤسسة</Label>
-                <Input id="pay-inst" value={institutionName} readOnly />
+                <Input
+                  id="pay-inst"
+                  required
+                  maxLength={200}
+                  placeholder="اكتب اسم المؤسسة كما هو مكتوب على الوصل"
+                  value={instName}
+                  onChange={(e) => setInstName(e.target.value)}
+                />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="pay-date">تاريخ الدفع</Label>

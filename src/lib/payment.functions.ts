@@ -17,6 +17,7 @@ export const submitPaymentProof = createServerFn({ method: "POST" })
         paidAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
         amount: z.number().int().min(100).max(100000),
         reference: z.string().trim().max(200).optional().nullable(),
+        institutionName: z.string().trim().min(2).max(200),
         proofPath: z.string().trim().min(5).max(500),
       })
       .parse(data),
@@ -48,6 +49,7 @@ export const submitPaymentProof = createServerFn({ method: "POST" })
       paid_at: data.paidAt,
       proof_url: data.proofPath,
       reference: data.reference ?? null,
+      note: `اسم المؤسسة على الوصل: ${data.institutionName}`,
       status: "pending",
     });
     if (error) throw new Error(error.message);
