@@ -14,7 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import logo from "@/assets/studydz-logo-st.png.asset.json";
+import logo from "@/assets/studydz-logo-sd.png.asset.json";
 
 export function BrandLogo({
   size = "md",
@@ -80,7 +80,7 @@ export function BrandLogo({
         <img
           src={logo.url}
           alt="شعار منصة Study DZ"
-          className={`${box} rounded-xl bg-[#EFEAE1] object-contain`}
+          className={`${box} rounded-xl bg-background object-contain`}
           width={44}
           height={44}
         />
