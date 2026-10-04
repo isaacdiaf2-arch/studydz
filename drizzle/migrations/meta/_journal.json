@@ -50,6 +50,13 @@
       "when": 1791106821163,
       "tag": "0006_learning_assessment_isolation",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791106844898,
+      "tag": "0007_assessment_results_published",
+      "breakpoints": true
     }
   ]
 }

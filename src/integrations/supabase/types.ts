@@ -136,6 +136,7 @@ export type Database = {
           program_id: string | null
           published: boolean
           published_at: string | null
+          results_published: boolean
           skill_id: string | null
           specialization_id: string | null
           teacher_id: string | null
@@ -158,6 +159,7 @@ export type Database = {
           program_id?: string | null
           published?: boolean
           published_at?: string | null
+          results_published?: boolean
           skill_id?: string | null
           specialization_id?: string | null
           teacher_id?: string | null
@@ -180,6 +182,7 @@ export type Database = {
           program_id?: string | null
           published?: boolean
           published_at?: string | null
+          results_published?: boolean
           skill_id?: string | null
           specialization_id?: string | null
           teacher_id?: string | null
