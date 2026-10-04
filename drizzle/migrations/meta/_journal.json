@@ -43,6 +43,13 @@
       "when": 1790900321962,
       "tag": "0005_institutions_daira",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791106821163,
+      "tag": "0006_learning_assessment_isolation",
+      "breakpoints": true
     }
   ]
 }
