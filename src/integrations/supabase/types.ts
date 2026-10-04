@@ -123,14 +123,22 @@ export type Database = {
       assessments: {
         Row: {
           created_at: string
+          description: string | null
+          due_at: string | null
           group_id: string | null
           held_on: string | null
           id: string
           institution_id: string
           kind: string
+          level_id: string | null
           max_score: number
           module_id: string | null
+          program_id: string | null
+          published: boolean
+          published_at: string | null
+          results_published: boolean
           skill_id: string | null
+          specialization_id: string | null
           teacher_id: string | null
           title: string
           updated_at: string
@@ -138,14 +146,22 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          description?: string | null
+          due_at?: string | null
           group_id?: string | null
           held_on?: string | null
           id?: string
           institution_id: string
           kind?: string
+          level_id?: string | null
           max_score?: number
           module_id?: string | null
+          program_id?: string | null
+          published?: boolean
+          published_at?: string | null
+          results_published?: boolean
           skill_id?: string | null
+          specialization_id?: string | null
           teacher_id?: string | null
           title: string
           updated_at?: string
@@ -153,14 +169,22 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          description?: string | null
+          due_at?: string | null
           group_id?: string | null
           held_on?: string | null
           id?: string
           institution_id?: string
           kind?: string
+          level_id?: string | null
           max_score?: number
           module_id?: string | null
+          program_id?: string | null
+          published?: boolean
+          published_at?: string | null
+          results_published?: boolean
           skill_id?: string | null
+          specialization_id?: string | null
           teacher_id?: string | null
           title?: string
           updated_at?: string
@@ -182,6 +206,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "assessments_level_id_fkey"
+            columns: ["level_id"]
+            isOneToOne: false
+            referencedRelation: "academic_levels"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "assessments_module_id_fkey"
             columns: ["module_id"]
             isOneToOne: false
@@ -189,10 +220,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "assessments_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "assessments_skill_id_fkey"
             columns: ["skill_id"]
             isOneToOne: false
             referencedRelation: "skills"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessments_specialization_id_fkey"
+            columns: ["specialization_id"]
+            isOneToOne: false
+            referencedRelation: "specializations"
             referencedColumns: ["id"]
           },
         ]
@@ -708,8 +753,10 @@ export type Database = {
           created_at: string
           description: string | null
           duration_minutes: number
+          group_id: string | null
           id: string
           institution_id: string
+          module_id: string | null
           published: boolean
           subject_id: string | null
           teacher_id: string
@@ -720,8 +767,10 @@ export type Database = {
           created_at?: string
           description?: string | null
           duration_minutes?: number
+          group_id?: string | null
           id?: string
           institution_id: string
+          module_id?: string | null
           published?: boolean
           subject_id?: string | null
           teacher_id: string
@@ -732,8 +781,10 @@ export type Database = {
           created_at?: string
           description?: string | null
           duration_minutes?: number
+          group_id?: string | null
           id?: string
           institution_id?: string
+          module_id?: string | null
           published?: boolean
           subject_id?: string | null
           teacher_id?: string
@@ -748,10 +799,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "exams_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "exams_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
             referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exams_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
             referencedColumns: ["id"]
           },
           {
@@ -767,9 +832,11 @@ export type Database = {
         Row: {
           class_id: string | null
           created_at: string
+          group_id: string | null
           id: string
           institution_id: string
           mime_type: string | null
+          module_id: string | null
           name: string
           owner_id: string
           subject_id: string | null
@@ -778,9 +845,11 @@ export type Database = {
         Insert: {
           class_id?: string | null
           created_at?: string
+          group_id?: string | null
           id?: string
           institution_id: string
           mime_type?: string | null
+          module_id?: string | null
           name: string
           owner_id: string
           subject_id?: string | null
@@ -789,9 +858,11 @@ export type Database = {
         Update: {
           class_id?: string | null
           created_at?: string
+          group_id?: string | null
           id?: string
           institution_id?: string
           mime_type?: string | null
+          module_id?: string | null
           name?: string
           owner_id?: string
           subject_id?: string | null
@@ -806,10 +877,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "files_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "files_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
             referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "files_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
             referencedColumns: ["id"]
           },
           {
@@ -914,6 +999,66 @@ export type Database = {
             columns: ["level_id"]
             isOneToOne: false
             referencedRelation: "academic_levels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      homework_submissions: {
+        Row: {
+          assessment_id: string
+          content: string | null
+          created_at: string
+          feedback: string | null
+          file_url: string | null
+          graded_at: string | null
+          graded_by: string | null
+          id: string
+          institution_id: string
+          student_id: string
+          submitted_at: string
+          updated_at: string
+        }
+        Insert: {
+          assessment_id: string
+          content?: string | null
+          created_at?: string
+          feedback?: string | null
+          file_url?: string | null
+          graded_at?: string | null
+          graded_by?: string | null
+          id?: string
+          institution_id: string
+          student_id: string
+          submitted_at?: string
+          updated_at?: string
+        }
+        Update: {
+          assessment_id?: string
+          content?: string | null
+          created_at?: string
+          feedback?: string | null
+          file_url?: string | null
+          graded_at?: string | null
+          graded_by?: string | null
+          id?: string
+          institution_id?: string
+          student_id?: string
+          submitted_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_submissions_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_submissions_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
         ]
@@ -1122,8 +1267,10 @@ export type Database = {
           content: string | null
           created_at: string
           description: string | null
+          group_id: string | null
           id: string
           institution_id: string
+          module_id: string | null
           pdf_url: string | null
           published: boolean
           subject_id: string | null
@@ -1136,8 +1283,10 @@ export type Database = {
           content?: string | null
           created_at?: string
           description?: string | null
+          group_id?: string | null
           id?: string
           institution_id: string
+          module_id?: string | null
           pdf_url?: string | null
           published?: boolean
           subject_id?: string | null
@@ -1150,8 +1299,10 @@ export type Database = {
           content?: string | null
           created_at?: string
           description?: string | null
+          group_id?: string | null
           id?: string
           institution_id?: string
+          module_id?: string | null
           pdf_url?: string | null
           published?: boolean
           subject_id?: string | null
@@ -1168,10 +1319,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "lessons_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "lessons_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
             referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lessons_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
             referencedColumns: ["id"]
           },
           {
@@ -2129,6 +2294,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_assessment: {
+        Args: { _assessment_id: string }
+        Returns: boolean
+      }
       current_institution: { Args: never; Returns: string }
       expire_subscriptions: {
         Args: never
@@ -2150,12 +2319,17 @@ export type Database = {
         Args: { _institution_id: string }
         Returns: boolean
       }
+      is_group_member: { Args: { _group_id: string }; Returns: boolean }
       is_institution_admin: { Args: never; Returns: boolean }
       is_platform_admin: { Args: never; Returns: boolean }
+      manages_assessment: { Args: { _assessment_id: string }; Returns: boolean }
       manages_institution: {
         Args: { _institution_id: string }
         Returns: boolean
       }
+      student_has_module: { Args: { _module_id: string }; Returns: boolean }
+      teaches_group: { Args: { _group_id: string }; Returns: boolean }
+      teaches_module: { Args: { _module_id: string }; Returns: boolean }
       verify_license: {
         Args: {
           _installation_id?: string
