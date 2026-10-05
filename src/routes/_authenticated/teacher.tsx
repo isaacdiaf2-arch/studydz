@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { BarChart3, BookOpen, CalendarClock, CalendarDays, ClipboardList, FileText, Megaphone, Table2 } from "lucide-react";
+import { BarChart3, BookOpen, CalendarClock, CalendarDays, ClipboardCheck, ClipboardList, FileText, Megaphone, Table2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { useAccount } from "@/lib/account";
 import { useScheduleView } from "@/lib/useScheduleView";
 import { TodayScheduleCard, WeekScheduleGrid } from "@/components/dashboard/ScheduleViews";
 import { AttendancePanel } from "@/components/dashboard/AttendancePanel";
+import { TeacherAssessmentsPanel } from "@/components/dashboard/TeacherAssessmentsPanel";
 
 export const Route = createFileRoute("/_authenticated/teacher")({
   component: TeacherDashboard,
@@ -25,6 +26,7 @@ const nav = [
   { key: "subjects", label: "موادي", icon: BookOpen },
   { key: "lessons", label: "الدروس", icon: FileText },
   { key: "exams", label: "الاختبارات", icon: ClipboardList },
+  { key: "assessments", label: "التقييمات والواجبات", icon: ClipboardCheck },
   { key: "results", label: "النتائج", icon: Table2 },
   { key: "announcements", label: "الإعلانات", icon: Megaphone },
 ];
@@ -408,6 +410,8 @@ function TeacherDashboard() {
           </div>
         </div>
       )}
+
+      {tab === "assessments" && <TeacherAssessmentsPanel />}
 
       {tab === "results" && (
         <div className="space-y-2">
