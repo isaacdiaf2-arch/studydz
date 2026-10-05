@@ -519,3 +519,6 @@ export const getGroupOverview = createServerFn({ method: "POST" })
     const [{ data: assessments }, { data: lessons }, { data: attendance }] = await Promise.all([aq, lq, attq]);
     return { groupId: data.groupId, assessments: assessments ?? [], lessons: lessons ?? [], attendance: attendance ?? [] };
   });
+
+/** Student-facing alias: published assessments/homework of the student's own groups only. */
+export const listStudentAssessments = getMyLearning;
