@@ -90,12 +90,12 @@ export function TeacherAssessmentsPanel() {
             <div className="grid gap-2"><Label>المادة</Label>
               <select required className={sel} value={form.moduleId} onChange={(e) => setForm({ ...form, moduleId: e.target.value })}>
                 <option value="">—</option>
-                {modules.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+                {modules.map((m: any) => <option key={m.id} value={m.id}>{m.name}</option>)}
               </select></div>
             <div className="grid gap-2"><Label>الفوج</Label>
               <select required className={sel} value={form.groupId} onChange={(e) => setForm({ ...form, groupId: e.target.value })}>
                 <option value="">—</option>
-                {groups.map((g) => <option key={g.id} value={g.id}>{g.name}{g.levelName ? ` · ${g.levelName}` : ""}</option>)}
+                {groups.map((g: any) => <option key={g.id} value={g.id}>{g.name}{g.levelName ? ` · ${g.levelName}` : ""}</option>)}
               </select></div>
             <div className="grid gap-2"><Label>العلامة القصوى</Label>
               <Input type="number" min={1} value={form.maxScore} onChange={(e) => setForm({ ...form, maxScore: Number(e.target.value) })} /></div>
