@@ -45,6 +45,11 @@ export function SiteFooter() {
                 التواصل والدعم
               </Link>
             </li>
+            <li>
+              <Link to="/connect" className="hover:text-foreground">
+                ربط مساعد ذكي
+              </Link>
+            </li>
           </ul>
         </div>
 
