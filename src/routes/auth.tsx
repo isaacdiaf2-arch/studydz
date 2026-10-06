@@ -63,7 +63,15 @@ function AuthPage() {
       : "تم إيقاف مؤسستك. تواصل مع إدارة المنصة لإعادة التفعيل."
     : null;
 
-  const destination = search.redirect ?? "/dashboard";
+  const rawRedirect = search.redirect;
+  const destination =
+    rawRedirect && rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
+      ? rawRedirect
+      : "/dashboard";
+  function goToDestination() {
+    if (destination.startsWith("/.lovable/")) window.location.href = destination;
+    else navigate({ to: destination });
+  }
 
   async function handleDemo(role: DemoRoleKey) {
     setError(null);
