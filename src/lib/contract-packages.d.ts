@@ -1,0 +1,2 @@
+declare module "arabic-persian-reshaper" { export const ArabicShaper: { convertArabic(s: string): string }; }
+declare module "bidi-js" { const factory: () => { getEmbeddingLevels(s: string, direction: string): unknown; getReorderedString(s: string, levels: unknown): string }; export default factory; }
