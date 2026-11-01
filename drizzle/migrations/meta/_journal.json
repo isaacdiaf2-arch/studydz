@@ -57,6 +57,13 @@
       "when": 1791106844898,
       "tag": "0007_assessment_results_published",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793518174723,
+      "tag": "0008_official_contract_signing_workflow",
+      "breakpoints": true
     }
   ]
 }

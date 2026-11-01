@@ -599,6 +599,35 @@ export type Database = {
           },
         ]
       }
+      contract_artifacts: {
+        Row: {
+          contract_id: string
+          created_at: string
+          pdf_base64: string
+          sha256: string
+        }
+        Insert: {
+          contract_id: string
+          created_at?: string
+          pdf_base64: string
+          sha256: string
+        }
+        Update: {
+          contract_id?: string
+          created_at?: string
+          pdf_base64?: string
+          sha256?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_artifacts_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: true
+            referencedRelation: "official_contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contract_events: {
         Row: {
           actor_id: string | null
@@ -636,6 +665,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      contract_provider_settings: {
+        Row: {
+          details: Json
+          id: boolean
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          details: Json
+          id?: boolean
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          details?: Json
+          id?: boolean
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: []
       }
       contracts: {
         Row: {
@@ -1545,6 +1595,78 @@ export type Database = {
           },
         ]
       }
+      official_contracts: {
+        Row: {
+          content_hash: string
+          correction_note: string | null
+          created_at: string
+          created_by: string
+          fields: Json
+          id: string
+          institution_evidence: Json | null
+          institution_id: string
+          legal_text: string
+          number: string
+          platform_evidence: Json | null
+          provider: Json
+          replaces_id: string | null
+          state: string
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          content_hash: string
+          correction_note?: string | null
+          created_at?: string
+          created_by: string
+          fields: Json
+          id?: string
+          institution_evidence?: Json | null
+          institution_id: string
+          legal_text: string
+          number: string
+          platform_evidence?: Json | null
+          provider: Json
+          replaces_id?: string | null
+          state?: string
+          updated_at?: string
+          version: string
+        }
+        Update: {
+          content_hash?: string
+          correction_note?: string | null
+          created_at?: string
+          created_by?: string
+          fields?: Json
+          id?: string
+          institution_evidence?: Json | null
+          institution_id?: string
+          legal_text?: string
+          number?: string
+          platform_evidence?: Json | null
+          provider?: Json
+          replaces_id?: string | null
+          state?: string
+          updated_at?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "official_contracts_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "official_contracts_replaces_id_fkey"
+            columns: ["replaces_id"]
+            isOneToOne: false
+            referencedRelation: "official_contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       options: {
         Row: {
           id: string
@@ -2330,6 +2452,19 @@ export type Database = {
       student_has_module: { Args: { _module_id: string }; Returns: boolean }
       teaches_group: { Args: { _group_id: string }; Returns: boolean }
       teaches_module: { Args: { _module_id: string }; Returns: boolean }
+      transition_official_contract: {
+        Args: {
+          _action: string
+          _actor: string
+          _evidence?: Json
+          _hash: string
+          _id: string
+          _note?: string
+          _pdf?: string
+          _pdf_hash?: string
+        }
+        Returns: undefined
+      }
       verify_license: {
         Args: {
           _installation_id?: string
