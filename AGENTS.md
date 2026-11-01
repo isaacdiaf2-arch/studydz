@@ -8,3 +8,7 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Versioned official contracts use separate immutable records and a service-only atomic transition RPC; legacy contracts remain historical and cannot substitute for the official signing workflow.
+- Final contract PDF bytes are stored once in an append-only database artifact record, shared by both authorized parties and checked with SHA-256 on download; never regenerate a signed document.
+- The uploaded source is embedded unchanged in the final PDF as the authoritative annex; editable fields and authenticated consent evidence are separate from fixed legal clauses.
