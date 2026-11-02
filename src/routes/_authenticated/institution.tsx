@@ -37,6 +37,13 @@ import { AssessmentsPanel } from "@/components/dashboard/AssessmentsPanel";
 
 
 export const Route = createFileRoute("/_authenticated/institution")({
+  head: () => ({ meta: [
+    { title: "لوحة المؤسسة والعقود الإلكترونية | Study DZ" },
+    { name: "description", content: "إدارة المؤسسة التعليمية ومراجعة عقود Study DZ وتوقيعها بأمان." },
+    { property: "og:title", content: "لوحة المؤسسة والعقود الإلكترونية | Study DZ" },
+    { property: "og:description", content: "إدارة المؤسسة التعليمية ومراجعة عقود Study DZ وتوقيعها بأمان." },
+    { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+  ] }),
   component: InstitutionDashboard,
 });
 

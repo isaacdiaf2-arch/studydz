@@ -58,6 +58,13 @@ import { LicensesPanel } from "@/components/dashboard/LicensesPanel";
 import { TotpSettings } from "@/components/dashboard/TotpSettings";
 
 export const Route = createFileRoute("/_authenticated/admin")({
+  head: () => ({ meta: [
+    { title: "إدارة المنصة واعتماد العقود | Study DZ" },
+    { name: "description", content: "مراجعة عقود المؤسسات والتوقيع الثاني وحفظ النسخ الرسمية في Study DZ." },
+    { property: "og:title", content: "إدارة المنصة واعتماد العقود | Study DZ" },
+    { property: "og:description", content: "مراجعة عقود المؤسسات والتوقيع الثاني وحفظ النسخ الرسمية في Study DZ." },
+    { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+  ] }),
   component: AdminDashboard,
 });
 
