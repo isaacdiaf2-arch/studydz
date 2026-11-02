@@ -19,10 +19,17 @@ export async function buildContractPdf(record: { number: string; fields: unknown
 
 export async function renderContractPdf(record: { number: string; fields: unknown; provider: unknown; content_hash: string; institution_evidence: unknown }, platform: SigningEvidence, fontBytes: Uint8Array, imageBytes: Uint8Array) {
   const doc = await PDFDocument.create();
-  doc.registerFontkit(fontkit);
+  doc.registerFontkit({ create: (bytes: Uint8Array) => {
+    const parsed = fontkit.create(bytes);
+    return new Proxy(parsed, { get(target, key) {
+      if (key === "layout") return (text: string) => target.layout(text, [], "latn", "ARA", "ltr");
+      const value = Reflect.get(target, key);
+      return typeof value === "function" ? value.bind(target) : value;
+    } });
+  } });
   doc.setTitle(`Study DZ — ${record.number}`);
   doc.setCreationDate(new Date(platform.signed_at));
-  const font = await doc.embedFont(fontBytes, { subset: false, features: { liga: false, rlig: false, calt: false, init: false, medi: false, fina: false } });
+  const font = await doc.embedFont(fontBytes, { subset: false });
   const bidi = bidiFactory();
   const visual = (s: string) => { const shaped = ArabicShaper.convertArabic(s); return bidi.getReorderedString(shaped, bidi.getEmbeddingLevels(shaped, "rtl")); };
   let page = doc.addPage([595.28, 841.89]);
