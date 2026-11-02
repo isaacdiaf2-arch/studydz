@@ -42,12 +42,12 @@ import {
 import { setInstitutionStatus } from "@/lib/platform.functions";
 import { reviewPaymentWithAudit } from "@/lib/payment.functions";
 import { runSubscriptionExpiry } from "@/lib/subscription-license.functions";
-import { signContractAsPlatform, setContractStatus } from "@/lib/contracts.functions";
+import { OfficialContractsPanel } from "@/components/dashboard/OfficialContractsPanel";
 import { CONTRACT_STATUS_LABEL, type ContractStatus } from "@/lib/contracts.shared";
 import { resolvePasswordReset } from "@/lib/auth.functions";
 import { decideTrialRequest } from "@/lib/inbound.functions";
 
-import { SignatureSheet } from "@/components/dashboard/SignatureSheet";
+
 import {
   InstitutionReviewPanel,
   ChangeRequestsPanel,
@@ -226,30 +226,7 @@ function AdminDashboard() {
     },
   });
 
-  const signPlatformFn = useServerFn(signContractAsPlatform);
-  const contractStatusFn = useServerFn(setContractStatus);
   const resolveResetFn = useServerFn(resolvePasswordReset);
-  const [signingContract, setSigningContract] = useState<string | null>(null);
-
-  const signContract = useMutation({
-    mutationFn: (vars: { contractId: string; signature: string }) => signPlatformFn({ data: vars }),
-    onSuccess: () => {
-      toast.success("تم اعتماد العقد وتفعيل الاشتراك.");
-      setSigningContract(null);
-      queryClient.invalidateQueries({ queryKey: ["admin"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const changeContract = useMutation({
-    mutationFn: (vars: { contractId: string; status: ContractStatus; note?: string }) =>
-      contractStatusFn({ data: vars }),
-    onSuccess: () => {
-      toast.success("تم تحديث حالة العقد.");
-      queryClient.invalidateQueries({ queryKey: ["admin"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
 
   const resolveReset = useMutation({
     mutationFn: (vars: {
@@ -802,82 +779,7 @@ function AdminDashboard() {
         </div>
       )}
 
-      {tab === "contracts" && (
-        <div className="space-y-3">
-          <FilterTabs
-            value={contractFilter}
-            onChange={setContractFilter}
-            options={[
-              ["all", "الكل"],
-              ["awaiting_institution", "بانتظار المؤسسة"],
-              ["awaiting_platform", "بانتظار المنصة"],
-              ["approved", "معتمدة"],
-              ["renewed", "مجدَّدة"],
-              ["cancelled", "ملغاة"],
-            ]}
-          />
-          {filteredContracts.length === 0 && <EmptyState text="لا توجد عقود." />}
-          {filteredContracts.map((c) => (
-            <div key={c.id} className="card-soft p-4">
-              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
-                <div className="min-w-0">
-                  <p className="truncate font-semibold">
-                    {(c.institutions as { name: string } | null)?.name ?? "مؤسسة"}
-                  </p>
-                  <p className="text-xs text-muted-foreground" dir="ltr">
-                    {c.contract_number ?? "—"}
-                  </p>
-                </div>
-                <span className="shrink-0 rounded-md bg-secondary px-2 py-1 text-xs text-secondary-foreground">
-                  {CONTRACT_STATUS_LABEL[(c.status ?? "created") as ContractStatus]}
-                </span>
-              </div>
-              <p className="mt-2 whitespace-pre-line text-sm leading-7 text-muted-foreground">
-                {c.body}
-              </p>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <SignatureBox title="إمضاء مدير المؤسسة" value={c.institution_signature} />
-                <SignatureBox title="إمضاء مدير المنصة" value={c.platform_signature} />
-              </div>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {c.status === "awaiting_platform" && (
-                  <Button size="sm" onClick={() => setSigningContract(c.id)}>
-                    <FileSignature className="ms-1 h-4 w-4" /> إمضاء واعتماد العقد
-                  </Button>
-                )}
-                {c.status !== "cancelled" && c.status !== "approved" && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => changeContract.mutate({ contractId: c.id, status: "cancelled" })}
-                  >
-                    <XCircle className="ms-1 h-4 w-4" /> إلغاء العقد
-                  </Button>
-                )}
-                {c.status === "approved" && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => changeContract.mutate({ contractId: c.id, status: "renewed" })}
-                  >
-                    تجديد العقد
-                  </Button>
-                )}
-              </div>
-            </div>
-          ))}
-          {signingContract && (
-            <SignatureSheet
-              open
-              title="إمضاء مدير المنصة"
-              onClose={() => setSigningContract(null)}
-              onConfirm={(signature: string) =>
-                signContract.mutate({ contractId: signingContract, signature })
-              }
-            />
-          )}
-        </div>
-      )}
+      {tab === "contracts" && <OfficialContractsPanel platform />}
 
       {tab === "resets" && (
         <div className="space-y-3">
