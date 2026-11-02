@@ -1,4 +1,4 @@
-import { PDFDocument } from "pdf-lib";
+import { PDFDocument, StandardFonts } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 import { ArabicShaper } from "arabic-persian-reshaper";
 import bidiFactory from "bidi-js";
@@ -30,19 +30,25 @@ export async function renderContractPdf(record: { number: string; fields: unknow
   doc.setTitle(`Study DZ — ${record.number}`);
   doc.setCreationDate(new Date(platform.signed_at));
   const font = await doc.embedFont(fontBytes, { subset: false });
+  const latin = await doc.embedFont(StandardFonts.Helvetica);
   const bidi = bidiFactory();
   const visual = (s: string) => { const shaped = ArabicShaper.convertArabic(s); return bidi.getReorderedString(shaped, bidi.getEmbeddingLevels(shaped, "rtl")); };
+  const runs = (s: string) => s.match(/[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff\ufb50-\ufdff\ufe70-\ufeff]+|[^\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff\ufb50-\ufdff\ufe70-\ufeff]+/g) ?? [];
+  const face = (s: string) => /[\u0600-\u06ff\ufb50-\ufeff]/.test(s) ? font : latin;
+  const measure = (s: string, size: number) => runs(s).reduce((sum, run) => sum + face(run).widthOfTextAtSize(run, size), 0);
   let page = doc.addPage([595.28, 841.89]);
   let y = 790;
   const line = (text: string, size = 12) => {
     const words = text.split(/\s+/); let pending = "";
     const draw = (s: string) => {
       if (y < 65) { page = doc.addPage([595.28, 841.89]); y = 790; }
-      const v = visual(s); page.drawText(v, { x: 550 - font.widthOfTextAtSize(v, size), y, size, font }); y -= size + 12;
+      const v = visual(s); let x = 550 - measure(v, size);
+      for (const run of runs(v)) { const f = face(run); page.drawText(run, { x, y, size, font: f }); x += f.widthOfTextAtSize(run, size); }
+      y -= size + 12;
     };
     for (const word of words) {
       const next = pending ? `${pending} ${word}` : word;
-      if (font.widthOfTextAtSize(visual(next), size) > 500 && pending) { draw(pending); pending = word; } else pending = next;
+      if (measure(visual(next), size) > 500 && pending) { draw(pending); pending = word; } else pending = next;
     }
     if (pending) draw(pending);
   };
