@@ -1,7 +1,5 @@
 import { PDFDocument } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
-import { ArabicShaper } from "arabic-persian-reshaper";
-import bidiFactory from "bidi-js";
 import fontAsset from "@/assets/contracts/font.asset.json";
 import referenceAsset from "@/assets/contracts/reference.jpg.asset.json";
 import { FIELD_LABELS, type ContractFields } from "./official-contract.shared";
@@ -24,8 +22,8 @@ export async function renderContractPdf(record: { number: string; fields: unknow
   doc.setCreationDate(new Date(platform.signed_at));
   // Full embedding avoids incorrect glyph IDs when subsetting the variable Arabic font.
   const font = await doc.embedFont(fontBytes, { subset: false });
-  const bidi = bidiFactory();
-  const visual = (s: string) => { const shaped = ArabicShaper.convertArabic(s); return bidi.getReorderedString(shaped, bidi.getEmbeddingLevels(shaped, "rtl")); };
+  // Fontkit shapes Arabic itself; pre-reordering would apply RTL twice.
+  const visual = (s: string) => s;
   let page = doc.addPage([595.28, 841.89]);
   let y = 790;
   const line = (text: string, size = 12) => {
