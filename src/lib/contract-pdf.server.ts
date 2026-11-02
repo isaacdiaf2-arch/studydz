@@ -22,7 +22,7 @@ export async function renderContractPdf(record: { number: string; fields: unknow
   doc.registerFontkit({ create: (bytes: Uint8Array) => {
     const parsed = fontkit.create(bytes);
     return new Proxy(parsed, { get(target, key) {
-      if (key === "layout") return (text: string) => target.layout(text, [], "latn", "ARA", "ltr");
+      if (key === "layout") return (text: string) => Reflect.apply(target.layout, target, [text, [], "latn", "ARA", "ltr"]);
       const value = Reflect.get(target, key);
       return typeof value === "function" ? value.bind(target) : value;
     } });
@@ -52,9 +52,16 @@ export async function renderContractPdf(record: { number: string; fields: unknow
     }
     if (pending) draw(pending);
   };
+  const latinLine = (text: string, size = 10) => {
+    if (y < 65) { page = doc.addPage([595.28, 841.89]); y = 790; }
+    page.drawText(text, { x: 550-latin.widthOfTextAtSize(text,size), y, size, font: latin }); y -= size+12;
+  };
   line("عقد Study DZ — البيانات التعاقدية والتوقيعان", 18);
-  line(`رقم العقد: ${record.number}`);
-  for (const [key, label] of Object.entries(FIELD_LABELS)) line(`${label}: ${(record.fields as ContractFields)[key as keyof ContractFields]}`);
+  line("رقم العقد:"); latinLine(record.number);
+  for (const [key, label] of Object.entries(FIELD_LABELS)) {
+    const value = (record.fields as ContractFields)[key as keyof ContractFields];
+    if (/^[\x20-\x7E]+$/.test(value)) { line(`${label}:`); latinLine(value); } else line(`${label}: ${value}`);
+  }
   const provider = record.provider as Record<string, string>;
   line("الطرف الثاني: مزود الخدمة — Study DZ", 15);
   line("النشاط: تطوير وتقديم حلول برمجية ومنصات تعليمية رقمية");
@@ -66,8 +73,8 @@ export async function renderContractPdf(record: { number: string; fields: unknow
     if (y < 270) { page = doc.addPage([595.28, 841.89]); y = 790; }
     line(evidence.role === "institution_admin" ? "إمضاء الطرف الأول (المؤسسة)" : "إمضاء الطرف الثاني (مزود الخدمة)", 15);
     line(`الاسم: ${evidence.name}`);
-    line(`هوية الحساب: ${evidence.actor_id}`, 10);
-    line(`تاريخ ووقت التوقيع (UTC): ${evidence.signed_at}`, 10);
+    line("هوية الحساب:", 10); latinLine(evidence.actor_id);
+    line("تاريخ ووقت التوقيع (UTC):", 10); latinLine(evidence.signed_at);
     line("تم التحقق من الحساب بكلمة المرور وتسجيل الموافقة الصريحة على محتوى العقد.", 10);
     const sig = await doc.embedPng(evidence.signature);
     page.drawImage(sig, { x: 340, y: y - 75, width: 200, height: 65 }); y -= 100;
