@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "asset_id": "18f84c6a-7df7-4506-9dc8-8cfa0f168f4c",
+  "asset_id": "0f8d7f0c-bad1-4b6a-b34d-2cfc040ac5aa",
   "project_id": "61704c04-869c-4a94-8a4c-9499fed312d8",
-  "url": "/__l5e/assets-v1/18f84c6a-7df7-4506-9dc8-8cfa0f168f4c/contract-arabic.ttf",
-  "r2_key": "a/v1/61704c04-869c-4a94-8a4c-9499fed312d8/18f84c6a-7df7-4506-9dc8-8cfa0f168f4c/contract-arabic.ttf",
-  "original_filename": "contract-arabic.ttf",
-  "size": 307592,
+  "url": "/__l5e/assets-v1/0f8d7f0c-bad1-4b6a-b34d-2cfc040ac5aa/contract-arabic-static.ttf",
+  "r2_key": "a/v1/61704c04-869c-4a94-8a4c-9499fed312d8/0f8d7f0c-bad1-4b6a-b34d-2cfc040ac5aa/contract-arabic-static.ttf",
+  "original_filename": "contract-arabic-static.ttf",
+  "size": 178388,
   "content_type": "font/ttf",
-  "created_at": "2026-11-01T07:29:06Z"
+  "created_at": "2026-11-02T17:10:48Z"
 }

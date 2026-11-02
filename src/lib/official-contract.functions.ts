@@ -75,6 +75,10 @@ export const signOfficialContract = createServerFn({ method: "POST" }).middlewar
     const institutionId = await institutionAdminContext(context);
     if (institutionId !== record.institution_id) throw new Error("403 — غير مسموح.");
   }
+  if (!isPlatform) {
+    const { data: signerProfile } = await context.supabase.from("profiles").select("institution_id").eq("id", context.userId).single();
+    if (signerProfile?.institution_id !== record.institution_id) throw new Error("403 — غير مسموح.");
+  }
   if (!['draft', 'awaiting_platform'].includes(record.state)) throw new Error("لا يمكن إعادة توقيع العقد.");
   if (record.content_hash !== data.expected_hash || await sha256(canonicalContract(record)) !== record.content_hash) throw new Error("تغير محتوى العقد؛ أعد مراجعته قبل التوقيع.");
   contractFieldsSchema.parse(record.fields); providerSchema.parse(record.provider);

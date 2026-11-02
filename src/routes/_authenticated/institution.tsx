@@ -25,11 +25,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { DashboardShell, StatCard, EmptyState } from "@/components/dashboard/DashboardShell";
-import { SignaturePad } from "@/components/dashboard/SignaturePad";
+import { OfficialContractsPanel } from "@/components/dashboard/OfficialContractsPanel";
 import { useAccount } from "@/lib/account";
 import { SchedulesManager } from "@/components/dashboard/SchedulesManager";
 import { createMember, deleteMember } from "@/lib/platform.functions";
-import { signContractAsInstitution } from "@/lib/contracts.functions";
+
 import { AcademicStructure } from "@/components/dashboard/AcademicStructure";
 import { AttendancePanel } from "@/components/dashboard/AttendancePanel";
 import { DownloadCenter } from "@/components/dashboard/DownloadCenter";
@@ -37,6 +37,13 @@ import { AssessmentsPanel } from "@/components/dashboard/AssessmentsPanel";
 
 
 export const Route = createFileRoute("/_authenticated/institution")({
+  head: () => ({ meta: [
+    { title: "لوحة المؤسسة والعقود الإلكترونية | Study DZ" },
+    { name: "description", content: "إدارة المؤسسة التعليمية ومراجعة عقود Study DZ وتوقيعها بأمان." },
+    { property: "og:title", content: "لوحة المؤسسة والعقود الإلكترونية | Study DZ" },
+    { property: "og:description", content: "إدارة المؤسسة التعليمية ومراجعة عقود Study DZ وتوقيعها بأمان." },
+    { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+  ] }),
   component: InstitutionDashboard,
 });
 
@@ -135,20 +142,6 @@ function InstitutionDashboard() {
         .select("*")
         .eq("institution_id", institutionId!)
         .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const contract = useQuery({
-    queryKey: ["institution", "contract", institutionId],
-    enabled: !!institutionId,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("contracts")
-        .select("*")
-        .eq("institution_id", institutionId!)
-        .maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -292,50 +285,7 @@ function InstitutionDashboard() {
         />
       )}
 
-      {tab === "contract" && (
-        <div className="space-y-3">
-          {!contract.data && <EmptyState text="لا يوجد عقد بعد." />}
-          {contract.data && (
-            <div className="card-soft p-4">
-              <h2 className="text-lg">العقد الرقمي</h2>
-              <p className="mt-2 text-sm leading-7 text-muted-foreground">{contract.data.body}</p>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <SignaturePad
-                  label="إمضاء مدير المؤسسة"
-                  value={contract.data.institution_signature}
-                  onSave={async (dataUrl) => {
-                    try {
-                      await signContractAsInstitution({
-                        data: { contractId: contract.data!.id, signature: dataUrl },
-                      });
-                      toast.success("تم حفظ الإمضاء.");
-                      invalidate();
-                    } catch (e) {
-                      toast.error(e instanceof Error ? e.message : "تعذر حفظ الإمضاء.");
-                    }
-                  }}
-
-                />
-                <div className="rounded-lg border border-border p-3">
-                  <p className="text-xs text-muted-foreground">كود QR مكان الختم</p>
-                  {contract.data.qr_payload ? (
-                    <img
-                      className="mt-2 h-28 w-28"
-                      alt="كود QR للعقد"
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(contract.data.qr_payload)}`}
-                    />
-                  ) : (
-                    <p className="mt-2 text-xs text-muted-foreground">يظهر بعد الإمضاء</p>
-                  )}
-                </div>
-              </div>
-              <p className="mt-3 text-xs text-muted-foreground">
-                تُحفظ نسخة من العقد لدى مدير المؤسسة ونسخة لدى مدير المنصة.
-              </p>
-            </div>
-          )}
-        </div>
-      )}
+      {tab === "contract" && <OfficialContractsPanel />}
 
       {tab === "settings" && institution && (
         <SettingsSection institution={institution} onDone={() => account.refetch()} />

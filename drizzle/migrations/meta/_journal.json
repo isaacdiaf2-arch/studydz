@@ -64,6 +64,13 @@
       "when": 1793518174723,
       "tag": "0008_official_contract_signing_workflow",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793639437521,
+      "tag": "0009_official_contract_explicit_write_revokes",
+      "breakpoints": true
     }
   ]
 }
