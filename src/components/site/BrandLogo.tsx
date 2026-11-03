@@ -106,10 +106,12 @@ export function BrandLogo({
           </DialogHeader>
           <form className="space-y-4" onSubmit={submit}>
             <div className="grid gap-2">
-              <Label htmlFor="unlock-email">البريد الإلكتروني</Label>
+              <Label htmlFor="unlock-email">رقم الهاتف</Label>
               <Input
                 id="unlock-email"
-                type="text"
+                type="tel"
+                inputMode="tel"
+                autoComplete="off"
                 dir="ltr"
                 autoFocus
                 required
