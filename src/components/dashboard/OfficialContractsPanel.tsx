@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { SignaturePad } from "./SignaturePad";
 import { FIELD_LABELS, OFFICIAL_CLAUSES, PREAMBLE, OFFICIAL_NOTE, RECORD_LABELS, contractFieldsSchema, type ContractFields } from "@/lib/official-contract.shared";
-import { listOfficialContracts, getContractDefaults, saveProviderDetails, saveOfficialContract, signOfficialContract, returnOfficialContract, downloadOfficialContract } from "@/lib/official-contract.functions";
+import { listOfficialContracts, getContractDefaults, saveProviderDetails, saveOfficialContract, signOfficialContract, returnOfficialContract, downloadOfficialContract, listContractAudit } from "@/lib/official-contract.functions";
 
 const blank: ContractFields = { institution_name: "", legal_form: "", address: "", institution_nif: "", commercial_register: "", manager_name: "", manager_capacity: "", signing_place: "", contract_date: new Date().toISOString().slice(0,10) };
 type RecordRow = NonNullable<Awaited<ReturnType<typeof listOfficialContracts>>>[number];
@@ -25,8 +25,10 @@ export function OfficialContractsPanel({ platform = false }: { platform?: boolea
   const [fields, setFields] = useState<ContractFields>(blank); const [replaces, setReplaces] = useState<string>();
   const [signature, setSignature] = useState(""); const [consent, setConsent] = useState(false); const [password, setPassword] = useState("");
   const [signing, setSigning] = useState(false); const [note, setNote] = useState(""); const [busy, setBusy] = useState(false);
+  const auditFn = useServerFn(listContractAudit);
+  const audit = useQuery({ queryKey: ["contract-audit", selected], enabled: !!selected, queryFn: () => { if (!selected) return []; return auditFn({ data: { id: selected } }); } });
   const record = records.data?.find(c => c.id === selected);
-  const refresh = () => { queryClient.invalidateQueries({ queryKey: ["official-contracts"] }); queryClient.invalidateQueries({ queryKey: ["admin"] }); };
+  const refresh = () => { queryClient.invalidateQueries({ queryKey: ["official-contracts"] }); queryClient.invalidateQueries({ queryKey: ["contract-audit"] }); queryClient.invalidateQueries({ queryKey: ["admin"] }); };
   async function act(fn: () => Promise<unknown>, message: string) {
     setBusy(true); try { await fn(); refresh(); toast.success(message); } catch(e) { toast.error(e instanceof Error ? e.message : "تعذر إتمام العملية."); } finally { setBusy(false); }
   }
@@ -73,6 +75,7 @@ export function OfficialContractsPanel({ platform = false }: { platform?: boolea
       <LegalClauses />
       <div className="grid gap-5 sm:grid-cols-2">{[["institution_evidence","إمضاء الطرف الأول (المؤسسة)"],["platform_evidence","إمضاء الطرف الثاني (مزود الخدمة)"]].map(([key,label]) => { const evidence = record[key as "institution_evidence" | "platform_evidence"] as Record<string,string> | null; return <section className="border-t border-border pt-4" key={key}><h4 className="font-semibold">{label}</h4>{evidence ? <><img src={evidence.signature} alt={label} className="h-24 w-full object-contain" /><p className="text-sm">{evidence.name}</p><p dir="ltr" className="break-all text-xs text-muted-foreground">{evidence.signed_at} (UTC)</p><p className="text-xs text-muted-foreground">الهوية موثقة والموافقة مسجلة</p></> : <p className="mt-3 text-sm text-muted-foreground">لم يتم التوقيع بعد</p>}</section>; })}</div>
       <p dir="ltr" className="break-all text-xs text-muted-foreground">SHA-256: {record.content_hash}</p>
+      <section className="border-t border-border pt-4"><h4 className="mb-3 font-semibold">سجل العقد</h4>{audit.data?.map(event => <div key={event.id} className="flex flex-wrap justify-between gap-2 border-b border-border py-2 text-xs"><span>{({ contract_created: "إنشاء العقد", contract_fields_updated: "تحديث الخانات", institution_sign: "توقيع المؤسسة", platform_sign: "التوقيع النهائي", return: "إعادة رسمية للتصحيح", contract_download_verified: "تنزيل نسخة بعد التحقق" } as Record<string,string>)[event.action] ?? event.action}</span><time dir="ltr">{event.created_at}</time></div>)}{audit.error && <p className="text-sm text-destructive">تعذر تحميل سجل العقد.</p>}</section>
       {record.state === "returned" && <div className="space-y-3"><p className="text-warning-foreground">سبب الإعادة: {record.correction_note}</p>{!platform && <Button onClick={() => edit(record,true)}><RotateCcw className="h-4 w-4" /> إنشاء نسخة مصححة</Button>}</div>}
       {record.state === "final" && <Button disabled={busy} onClick={() => act(() => downloadPdf(record), "تم تنزيل النسخة الرسمية.")}><Download className="h-4 w-4" /> تحميل النسخة الرسمية PDF</Button>}
       {!platform && record.state === "draft" && !signing && <div className="flex gap-3"><Button variant="outline" onClick={() => edit(record)}>تعديل الخانات</Button><Button onClick={() => { setSigning(true); setSignature(""); setConsent(false); setPassword(""); }}>الانتقال إلى التوقيع</Button></div>}

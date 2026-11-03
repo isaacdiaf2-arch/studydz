@@ -61,8 +61,7 @@ export const saveOfficialContract = createServerFn({ method: "POST" }).middlewar
     ? await supabaseAdmin.from("official_contracts").update({ fields: data.fields, content_hash }).eq("id", existing.id).eq("state", "draft").select("id").single()
     : await supabaseAdmin.from("official_contracts").insert({ ...record, institution_id: institutionId, content_hash, created_by: context.userId, replaces_id: data.replaces_id ?? null }).select("id").single();
   if (result.error) throw new Error("تعذر الحفظ؛ تحقق من عدم وجود عقد آخر قيد المعالجة.");
-  const { error } = await supabaseAdmin.from("audit_logs").insert({ actor_id: context.userId, institution_id: institutionId, actor_role: "institution_admin", action: existing ? "contract_fields_updated" : "contract_created", resource: "official_contract", resource_id: result.data.id, result: "success", metadata: { content_hash, replaces_id: data.replaces_id ?? null } });
-  if (error) throw new Error("تعذر توثيق العقد.");
+  // The database trigger records creation/field edits in the same transaction.
   return { id: result.data.id };
 });
 
@@ -123,5 +122,18 @@ export const downloadOfficialContract = createServerFn({ method: "POST" }).middl
   const { data: artifact } = await context.supabase.from("contract_artifacts").select("pdf_base64,sha256").eq("contract_id", data.id).maybeSingle();
   if (!artifact) throw new Error("403 — النسخة النهائية غير متاحة.");
   if (await sha256(new Uint8Array(Buffer.from(artifact.pdf_base64, "base64"))) !== artifact.sha256) throw new Error("فشل التحقق من سلامة النسخة؛ تم منع التنزيل.");
+  const { data: contract } = await context.supabase.from("official_contracts").select("institution_id").eq("id", data.id).single();
+  if (!contract) throw new Error("403 — غير مسموح.");
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { error } = await supabaseAdmin.from("audit_logs").insert({ actor_id: context.userId, institution_id: contract.institution_id, action: "contract_download_verified", resource: "official_contract", resource_id: data.id, result: "success", metadata: { sha256: artifact.sha256 } });
+  if (error) throw new Error("تعذر توثيق تنزيل النسخة الرسمية.");
   return artifact;
+});
+
+export const listContractAudit = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth]).inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).strict().parse(input)).handler(async ({ context, data }) => {
+  const { data: record } = await context.supabase.from("official_contracts").select("id").eq("id",data.id).maybeSingle();
+  if (!record) throw new Error("403 — غير مسموح.");
+  const { data: events, error } = await context.supabase.from("audit_logs").select("id,action,actor_id,created_at,result").eq("resource","official_contract").eq("resource_id",data.id).order("created_at",{ ascending: true }).limit(100);
+  if (error) throw new Error("تعذر جلب سجل العقد.");
+  return events;
 });
