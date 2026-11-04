@@ -55,6 +55,7 @@ import {
   InvoicesPanel,
 } from "@/components/dashboard/AdminGovernance";
 import { LicensesPanel } from "@/components/dashboard/LicensesPanel";
+import { PlatformActivityLog } from "@/components/dashboard/PlatformActivityLog";
 import { TotpSettings } from "@/components/dashboard/TotpSettings";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -972,14 +973,7 @@ function AdminDashboard() {
         </div>
       )}
 
-      {tab === "activity" && (
-        <div className="space-y-2">
-          {(events.data ?? []).length === 0 && <EmptyState text="لا توجد عمليات مسجّلة." />}
-          {(events.data ?? []).map((e) => (
-            <EventRow key={e.id} event={e} institutionName={instNames.get(e.institution_id)} />
-          ))}
-        </div>
-      )}
+      {tab === "activity" && <PlatformActivityLog />}
 
       {tab === "preview" && (
         <div className="space-y-4">
