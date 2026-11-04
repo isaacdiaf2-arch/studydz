@@ -78,6 +78,13 @@
       "when": 1793689397848,
       "tag": "0010_official_contract_creation_audit",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1793798464381,
+      "tag": "0011_platform_activity_triggers",
+      "breakpoints": true
     }
   ]
 }
