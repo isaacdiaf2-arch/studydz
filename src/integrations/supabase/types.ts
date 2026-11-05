@@ -125,6 +125,7 @@ export type Database = {
           created_at: string
           description: string | null
           due_at: string | null
+          exam_id: string | null
           group_id: string | null
           held_on: string | null
           id: string
@@ -148,6 +149,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           due_at?: string | null
+          exam_id?: string | null
           group_id?: string | null
           held_on?: string | null
           id?: string
@@ -171,6 +173,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           due_at?: string | null
+          exam_id?: string | null
           group_id?: string | null
           held_on?: string | null
           id?: string
@@ -191,6 +194,13 @@ export type Database = {
           weight?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "assessments_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "assessments_group_id_fkey"
             columns: ["group_id"]
