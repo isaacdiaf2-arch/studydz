@@ -2,8 +2,11 @@ import { createServerFn } from "@tanstack/react-start";
 import { setResponseStatus } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { quizService as QuizServiceFactory } from "@/server/quiz/quiz.service";
 
-async function run<T>(fn: (svc: any) => Promise<T>): Promise<T> {
+type QuizService = ReturnType<typeof QuizServiceFactory>;
+
+async function run<T>(fn: (svc: QuizService) => Promise<T>): Promise<T> {
   const { getServiceDb } = await import("@/server/db/adapter");
   const { quizService, ForbiddenError } = await import("@/server/quiz/quiz.service");
   try {
