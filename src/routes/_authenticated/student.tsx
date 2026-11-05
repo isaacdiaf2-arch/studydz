@@ -11,7 +11,7 @@ import { DashboardShell, StatCard, EmptyState } from "@/components/dashboard/Das
 import { useAccount } from "@/lib/account";
 import { useScheduleView } from "@/lib/useScheduleView";
 import { TodayScheduleCard, WeekScheduleGrid } from "@/components/dashboard/ScheduleViews";
-import { getExamForStudent, submitExam } from "@/lib/exam.functions";
+import { useStudentQuiz, useStudentQuizzes, useSubmitQuiz } from "@/hooks/use-student-quizzes";
 import { listStudentAssessments, submitHomework } from "@/lib/assessment.functions";
 
 
@@ -82,32 +82,7 @@ function StudentDashboard() {
     },
   });
 
-  const exams = useQuery({
-    queryKey: ["student", "exams", institutionId],
-    enabled: !!institutionId,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("exams")
-        .select("*, subjects(name)")
-        .eq("published", true)
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const attempts = useQuery({
-    queryKey: ["student", "attempts", userId],
-    enabled: !!userId,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("attempts")
-        .select("*, exams(title, subjects(name))")
-        .eq("student_id", userId!);
-      if (error) throw error;
-      return data;
-    },
-  });
+  const quizzes = useStudentQuizzes();
 
   const announcements = useQuery({
     queryKey: ["student", "announcements", institutionId],
@@ -125,7 +100,7 @@ function StudentDashboard() {
   if (activeExam) {
     return (
       <ExamRunner
-        examId={activeExam}
+        assessmentId={activeExam}
 
         onDone={() => {
           setActiveExam(null);
@@ -135,7 +110,7 @@ function StudentDashboard() {
     );
   }
 
-  const done = new Set((attempts.data ?? []).map((a) => a.exam_id));
+  const quizList = quizzes.data ?? [];
 
   return (
     <DashboardShell title="لوحة الطالب" nav={nav} active={tab} onChange={setTab}>
@@ -148,7 +123,7 @@ function StudentDashboard() {
             <StatCard label="الدروس" value={lessons.data?.length ?? 0} icon={FileText} />
             <StatCard
               label="اختبارات قادمة"
-              value={(exams.data ?? []).filter((e) => !done.has(e.id)).length}
+              value={quizList.filter((q) => !q.attempt).length}
               icon={ClipboardList}
             />
           </div>
@@ -228,22 +203,22 @@ function StudentDashboard() {
 
       {tab === "exams" && (
         <div className="space-y-2">
-          {(exams.data ?? []).length === 0 && <EmptyState text="لا توجد اختبارات." />}
-          {(exams.data ?? []).map((e) => (
+          {quizList.length === 0 && <EmptyState text="لا توجد اختبارات." />}
+          {quizList.map((e) => (
             <div key={e.id} className="card-soft flex flex-wrap items-center gap-2 p-3 text-sm">
               <div className="min-w-0">
                 <p className="font-semibold">{e.title}</p>
                 <p className="text-xs text-muted-foreground">
-                  {(e.subjects as { name: string } | null)?.name ?? "—"} · {e.duration_minutes} دقيقة
+                  {e.module ?? "—"} · {e.durationMinutes ?? "—"} دقيقة
                 </p>
               </div>
               <Button
                 size="sm"
                 className="ms-auto"
-                disabled={done.has(e.id)}
+                disabled={!!e.attempt}
                 onClick={() => setActiveExam(e.id)}
               >
-                {done.has(e.id) ? "تم الاجتياز" : "ابدأ الاختبار"}
+                {e.attempt ? "تم الاجتياز" : "ابدأ الاختبار"}
               </Button>
             </div>
           ))}
@@ -254,12 +229,12 @@ function StudentDashboard() {
 
       {tab === "results" && (
         <div className="space-y-2">
-          {(attempts.data ?? []).length === 0 && <EmptyState text="لا توجد نتائج بعد." />}
-          {(attempts.data ?? []).map((a) => (
+          {quizList.filter((q) => q.attempt).length === 0 && <EmptyState text="لا توجد نتائج بعد." />}
+          {quizList.filter((q) => q.attempt).map((a) => (
             <div key={a.id} className="card-soft flex items-center gap-2 p-3 text-sm">
-              <span className="font-semibold">{(a.exams as { title: string } | null)?.title}</span>
+              <span className="font-semibold">{a.title}</span>
               <span className="ms-auto rounded-md bg-secondary px-2 py-1 text-xs">
-                {a.score}/{a.max_score}
+                {a.attempt?.score}/{a.attempt?.maxScore}
               </span>
             </div>
           ))}
@@ -400,28 +375,23 @@ function StudentAssessments() {
 }
 
 function ExamRunner({
-  examId,
+  assessmentId,
   onDone,
 }: {
-  examId: string;
+  assessmentId: string;
   onDone: () => void;
 }) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
-  const loadExam = useServerFn(getExamForStudent);
-  const sendSubmit = useServerFn(submitExam);
-
-  const exam = useQuery({
-    queryKey: ["student", "exam", examId],
-    queryFn: () => loadExam({ data: { examId } }),
-  });
+  const exam = useStudentQuiz(assessmentId);
+  const sendSubmit = useSubmitQuiz();
 
   const questions = exam.data?.questions ?? [];
 
   async function submit() {
     setBusy(true);
     try {
-      const result = await sendSubmit({ data: { examId, answers } });
+      const result = await sendSubmit(assessmentId, answers);
       toast.success(`تم تسليم الاختبار — نتيجتك ${result.score}/${result.maxScore}`);
       onDone();
     } catch (error) {
