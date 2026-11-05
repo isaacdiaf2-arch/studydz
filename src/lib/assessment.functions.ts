@@ -133,6 +133,7 @@ const assessmentInput = z.object({
   heldOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
   dueAt: z.string().max(40).optional().nullable(),
   description: z.string().trim().max(4000).optional().nullable(),
+  examId: z.string().uuid().nullable().optional(),
 });
 
 async function resolveLinks(actor: Actor, groupId: string, moduleId: string) {
@@ -169,7 +170,14 @@ export const createAssessment = createServerFn({ method: "POST" })
       const { data: sk } = await actor.admin.from("skills").select("module_id").eq("id", data.skillId).maybeSingle();
       if (!sk || sk.module_id !== data.moduleId) forbid();
     }
+    if (data.examId) {
+      if (data.kind !== "quiz") forbid();
+      const { data: ex } = await actor.admin.from("exams").select("institution_id, teacher_id").eq("id", data.examId).maybeSingle();
+      if (!ex || ex.institution_id !== actor.institutionId) forbid();
+      if (actor.role === "teacher" && ex.teacher_id !== actor.userId) forbid();
+    }
     const { data: row, error } = await actor.admin.from("assessments").insert({
+      exam_id: data.examId ?? null,
       institution_id: actor.institutionId,
       group_id: data.groupId,
       module_id: data.moduleId,
