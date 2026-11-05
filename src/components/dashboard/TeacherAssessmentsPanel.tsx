@@ -1,3 +1,4 @@
+import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -43,9 +44,19 @@ export function TeacherAssessmentsPanel() {
     queryKey: ["t-assess", "list"],
     queryFn: () => listFn({ data: { limit: 100, offset: 0 } }),
   });
+  const myExams = useQuery({
+    queryKey: ["t-assess", "exam-banks"],
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      const { data, error } = await supabase.from("exams").select("id, title")
+        .eq("teacher_id", u.user?.id ?? "").order("created_at", { ascending: false }).limit(100);
+      if (error) throw error;
+      return data;
+    },
+  });
   const refresh = () => qc.invalidateQueries({ queryKey: ["t-assess"] });
 
-  const [form, setForm] = useState({ title: "", kind: "quiz", groupId: "", moduleId: "", maxScore: 20, weight: 1, heldOn: "", dueAt: "", description: "" });
+  const [form, setForm] = useState({ title: "", kind: "quiz", groupId: "", moduleId: "", maxScore: 20, weight: 1, heldOn: "", dueAt: "", description: "", examId: "" });
   const create = useMutation({
     mutationFn: () =>
       createFn({
@@ -54,6 +65,7 @@ export function TeacherAssessmentsPanel() {
           maxScore: Number(form.maxScore), weight: Number(form.weight),
           heldOn: form.heldOn || null, dueAt: form.dueAt ? new Date(form.dueAt).toISOString() : null,
           description: form.description || null,
+          examId: form.kind === "quiz" && form.examId ? form.examId : null,
         },
       }),
     onSuccess: () => { toast.success("تم إنشاء التقييم."); setView("list"); refresh(); },
@@ -103,6 +115,13 @@ export function TeacherAssessmentsPanel() {
               <Input type="number" min={0} step={0.5} value={form.weight} onChange={(e) => setForm({ ...form, weight: Number(e.target.value) })} /></div>
             <div className="grid gap-2"><Label>التاريخ</Label>
               <Input type="date" value={form.heldOn} onChange={(e) => setForm({ ...form, heldOn: e.target.value })} /></div>
+            {form.kind === "quiz" && (
+              <div className="grid gap-2"><Label>أسئلة الاختبار الإلكتروني</Label>
+                <select className={sel} value={form.examId} onChange={(e) => setForm({ ...form, examId: e.target.value })}>
+                  <option value="">— بدون اختبار إلكتروني —</option>
+                  {(myExams.data ?? []).map((x: any) => <option key={x.id} value={x.id}>{x.title}</option>)}
+                </select></div>
+            )}
             {form.kind === "homework" && (
               <div className="grid gap-2"><Label>آخر أجل للتسليم</Label>
                 <Input type="datetime-local" value={form.dueAt} onChange={(e) => setForm({ ...form, dueAt: e.target.value })} /></div>

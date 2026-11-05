@@ -1,4 +1,4 @@
-import logo from "@/assets/studydz-logo.png.asset.json";
+import logo from "@/assets/studydz-logo-new.png.asset.json";
 
 export const CONTRACT_STATUS_LABEL: Record<string, string> = {
   created: "🟡 تم الإنشاء",
