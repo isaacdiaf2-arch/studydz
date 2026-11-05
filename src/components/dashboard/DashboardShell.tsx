@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/studydz-logo.png.asset.json";
+import logo from "@/assets/studydz-logo-new.png.asset.json";
 
 export interface NavItem {
   key: string;
