@@ -12,7 +12,7 @@ export function SiteFooter() {
             <span className="font-display text-lg font-extrabold">Study DZ</span>
           </div>
           <p className="mt-3 max-w-sm text-sm leading-7 text-muted-foreground">
-            Study DZ نظام تشغيل رقمي للمؤسسات التعليمية والتكوينية في الجزائر، متاح عبر منصة
+            Study DZ نظام رقمي للمؤسسات التعليمية والتكوينية في الجزائر، متاح عبر منصة
             سحابية موحّدة تجمع إدارة المؤسسة والتعليم والتعلّم والمتابعة في نظام واحد.
           </p>
         </div>
