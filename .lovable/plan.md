@@ -1,54 +1,83 @@
-## ما تم إصلاحه الآن (منجز)
+# خطة استقلال Study DZ عن Supabase (تخطيط فقط)
 
-- **زر تسجيل الدخول**: كان يعمل فعلاً لكن دون أي رسالة. سبب المشكلة أن حاوية التنبيهات (Toaster) لم تكن مركّبة في التطبيق إطلاقاً، فلا رسالة نجاح ولا خطأ تظهر. تم تركيبها + رسالة خطأ واضحة داخل النموذج ("البريد الإلكتروني أو كلمة المرور غير صحيحة").
-- **دخول مدير المنصة**: أُعيد النقر ثلاث مرات على "Study DZ" → نافذة كلمة المرور `getup`. إن لم تكن مسجّل الدخول، يُحفظ الرمز ويُطبَّق تلقائياً بعد تسجيل الدخول ثم تنتقل إلى `/admin`. تم اختباره فعلياً.
+## 1. حصر الاعتماد الحالي (من الكود الفعلي)
 
-> ملاحظة أمنية: هذا الباب الخلفي أزلناه سابقاً بناءً على فحص أمني. أعدته كما طلبت، وأنصح بتغيير الرمز لاحقاً عبر سر `PLATFORM_UNLOCK_CODE` بدل `getup`.
+| المجال | أين | الحجم |
+|---|---|---|
+| SDK | `@supabase/supabase-js`، عملاء `src/integrations/supabase/*` (client, client.server, auth-middleware, auth-attacher, previewAuthStorage, types) | 52 ملفًا تستورد supabase |
+| Auth (متصفح) | `signInWithPassword` في `auth.tsx`, `register.tsx`, `trial.tsx`؛ `getUser()` في `_authenticated/route.tsx`, `DashboardShell.tsx`, `account.ts`, `institution.tsx`, `SchedulesManager.tsx`, `TeacherAssessmentsPanel.tsx` | جلسة في localStorage |
+| Auth (خادم/admin) | `auth.admin.createUser/updateUserById/deleteUser/listUsers` في `signup`, `platform`, `demo`, `vault`, `auth.functions.ts`؛ إعادة تحقق كلمة المرور في `official-contract.functions.ts` | 19 ملف server fn يستخدم `requireSupabaseAuth` |
+| قاعدة البيانات عبر PostgREST | `.from()/.rpc()` في كل `src/lib/*.functions.ts` (أكبرها assessment 42، platform 25، official-contract 24) | استدعاءات مباشرة من المتصفح أيضًا: SchedulesManager (8)، institution (4)، teacher (3)، student/AssessmentsPanel (2)، admin/Licenses/TeacherAssessments (1) |
+| RLS + دوال SQL | ~45 جدولًا بسياسات تعتمد `auth.uid()`؛ دوال `has_role`, `manages_institution`, `teaches_*`, `is_group_member`, `transition_official_contract` (تقرأ `auth.uid()` أو `_actor`) ومشغلات `log_table_activity`, `guard_*` | العزل بين المؤسسات قائم أساسًا على RLS |
+| مشغّل auth.users | `on_auth_user_created → handle_new_user` | ينشئ profiles |
+| Storage | دلوان خاصان `institution-media`, `payment-proofs` (register, subscribe, institution, admin) | روابط موقّعة |
+| Edge Functions | `supabase/functions/expire-subscriptions` (يستدعي `expire_subscriptions()`) | مهمة مجدولة |
+| Realtime | لا استخدام | — |
+| Migrations | مزدوجة: `supabase/migrations/*` (21) و`drizzle/migrations/0000–0012`؛ `drizzle/schema.ts` فارغ عمليًا (سطر واحد) | لا مخطط Drizzle حقيقي |
+| Types | `src/integrations/supabase/types.ts` مولّد | مستخدم في كل مكان |
+| Env | `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY/ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `VITE_SUPABASE_*`, `LOVABLE_DB_MIGRATION_URL` | |
+| أخرى | MCP OAuth (`src/lib/mcp/supabase.ts`, صفحة consent) مبني على Supabase OAuth server | سيتطلب بديلًا أو إيقافًا |
+| Adapter | `src/server/db/adapter.ts` يعيد `supabaseAdmin` (شريحة الاختبارات فقط) | نقطة البداية |
 
-## باقي الطلب — 5 مراحل
+## 2. التدفق الحالي
 
-### المرحلة 1 — البريد الإلكتروني الحقيقي (أولوية)
-حالياً نماذج "التواصل" و"طلب التجربة" تُخزَّن في القاعدة فقط ولا تُرسل بريداً.
-- ربط خدمة إرسال بريد حقيقية (Resend) عبر دالة خادم، وإرسال كل رسالة تواصل/دعم إلى `isaacdiaf2@gmail.com`.
-- صفحة **طلب تجربة** جديدة: اسم المؤسسة، البريد، الهاتف، دافع التجربة → يُرسل بريداً حقيقياً + يُنشئ حساب تجريبي صالحاً **24 ساعة فقط** (حقل `trial_ends_at`) مع إيقاف الوصول تلقائياً بعد انتهائها.
-- سيلزم مفتاح Resend API ونطاق بريد مُوثَّق (أو الإرسال من نطاق Lovable الافتراضي).
+```text
+المتصفح ──signInWithPassword──> Supabase Auth ──JWT──> localStorage
+   │                                         
+   ├─ supabase.from(...) مباشرة ──> PostgREST ──RLS(auth.uid())──> Postgres
+   └─ server fn + Bearer (attachSupabaseAuth)
+          └─ requireSupabaseAuth ──> context.supabase (RLS كمستخدم)
+                                └─> supabaseAdmin (يتجاوز RLS) للعمليات المميزة
+الأدوار: public.user_roles + has_role(); 2FA: user_mfa/totp.functions (خاص بالتطبيق)
+```
 
-### المرحلة 2 — لوحة مدير المنصة بتصميم الصورة
-إعادة بناء `/admin` بالكامل حسب اللقطة المرسلة:
-- شريط جانبي يمين (الرئيسية، المؤسسات، المديرون، المستخدمون، الاشتراكات، المدفوعات، العقود، الإشعارات، الدعم الفني، النسخ الاحتياطي، التقارير، الإعدادات) + بطاقة "الدعم الفني" أسفله.
-- شريط علوي: بطاقة المستخدم، جرس الإشعارات، الوضع الليلي، ملء الشاشة.
-- الإجراءات السريعة (6 أزرار ملوّنة)، بطاقات المجموعات الست، قسم "أدوات النظام"، تذييل بالإصدار.
-- نفس نظام الألوان (بنفسجي/أزرق/أخضر على خلفية بيضاء) وسيُطبَّق لاحقاً على لوحات المدير والأستاذ والطالب.
+## 3. البنية المستقلة المقترحة
 
-### المرحلة 3 — ملف المؤسسة الموسّع
-توسيع صفحة التسجيل وجدول `institutions` بالحقول المطلوبة:
-- الهوية: الاسم بالعربية/الفرنسية، الشعار، صورة الغلاف، نوع المؤسسة (مدرسة خاصة / مؤسسة تعليمية / مركز تكوين / معهد تكوين / أكاديمية)، رقم الاعتماد، تاريخ التأسيس، الجهة المانحة.
-- الموقع: الولاية، الدائرة، البلدية، العنوان، الرمز البريدي، رابط Google Maps.
-- التواصل: هاتفان، واتساب، بريد، موقع، فيسبوك، إنستغرام، لينكدإن، يوتيوب، تيك توك.
-- **إلزام** رقم الاعتماد + رقم السجل التجاري عند اختيار نوع خاص (مدرسة/معهد/مركز خاص) — تحقق في الواجهة وفي الخادم.
+| الوظيفة | الخيار A (موصى به) | الخيار B |
+|---|---|---|
+| PostgreSQL | Neon (منطقة Frankfurt) — مجاني محدود (~0.5GB، توقف عند الخمول)، المدفوع من ~19$/شهر | Railway Postgres (~5$+ استهلاكي، لا مجاني دائم) |
+| API/runtime | Cloudflare Workers (القالب الحالي يستهدفه أصلًا) — مجاني 100k طلب/يوم، مدفوع 5$/شهر | Railway/Render خادم Node (~7$/شهر) |
+| Auth/sessions | Better Auth داخل التطبيق + Drizzle adapter، جلسات cookie httpOnly، يدعم bcrypt و2FA | Lucia-style يدوي أو Clerk (تكلفة لكل مستخدم + بيانات خارج سيطرتك) |
+| Object storage | Cloudflare R2 — مجاني 10GB، بلا رسوم خروج | Backblaze B2 / S3 |
+| Email | Resend (مجاني 3000/شهر، يتطلب نطاقًا موثقًا) | Brevo |
+| Jobs/backups | Cloudflare Cron Triggers + GitHub Actions يومي `pg_dump` مشفّر إلى R2 | Railway cron |
 
-### المرحلة 4 — الأكاديمي: المواد والأقسام والتخصصات
-- بنك مواد جاهز حسب المنهاج الجزائري: الأطوار الابتدائية (1-2، 3، 4-5)، المتوسط (1-4)، الثانوي بكل الشعب (آداب وفلسفة، لغات أجنبية، علوم تجريبية، رياضيات، هندسة، معلوماتية وذكاء اصطناعي، تسيير واقتصاد) مع المعاملات.
-- تخصصات مراكز/معاهد التكوين (BT 24 شهراً، BTS 30 شهراً، التكوين التأهيلي) ودورات المراكز الخاصة برقم اعتماد لكل دورة.
-- عند اختيار الطور/الشعبة تُقترح المواد تلقائياً، مع إمكانية إضافة مواد يدوياً.
-- ربط الأستاذ بمواده وأقسامه فقط (يرى ما يخصّه لا غير).
+التوصية: الخيار A. السبب: لا تغيير في runtime (Workers)، Drizzle + `postgres`/Neon serverless driver يعملان على Workers، Better Auth مكتبة TypeScript داخل الكود (لا مزود هوية خارجي جديد)، R2 متوافق S3 ورخيص لأوروبا القريبة من الجزائر. المخاطر: لا شيء مجاني للأبد؛ Neon المجاني يتوقف عند الخمول (يُنصح بالمدفوع للإنتاج)، والكمون من الجزائر إلى Frankfurt ~40–60ms مقبول.
 
-### المرحلة 5 — الوحدات الوظيفية المتبقية
-حسب الأولوية، وحدة تلو الأخرى:
-1. الحضور والغياب + النتائج والمعدلات + تقرير تقدّم شهري.
-2. الواجبات المنزلية وبنك الأسئلة والمكتبة التعليمية، وتوسيع الاختبارات (صح/خطأ، إجابة قصيرة، توقيت).
-3. الرسائل والإشعارات الفورية + أسئلة تحت كل درس.
-4. المالية: رسوم الطلاب، الفواتير، سجل المدفوعات، تقارير مالية.
-5. الأمان: سجل العمليات، النسخ الاحتياطي، روابط الدعوة برمز يُستعمل مرة واحدة.
-6. تخصيص شعار/ألوان كل مؤسسة + النطاق الفرعي + العمل دون اتصال ومزامنة.
+قيد مهم يجب معرفته: Lovable Cloud لا يمكن فصله عن المشروع، ومعاينة المحرر والنشر على lovable.app ستبقى مرتبطة به؛ الاستقلال الحقيقي يعني نشر الإنتاج على Cloudflare بحسابك (نطاق خاص) وتصدير الكود عبر GitHub، مع بقاء Cloud احتياطيًا حتى ينتهي rollback.
 
-## تفاصيل تقنية
+## 4. المراحل
 
-- كل الإرسال البريدي عبر `createServerFn` + Resend، مع تحقق Zod ومنع الإرسال المتكرر (rate limit) لأن النماذج عمومية.
-- التجربة 24 ساعة: عمود `trial_ends_at` على `institutions` + سياسة RLS ودالة تحقق تمنع الاستخدام بعد الانتهاء.
-- كل جدول جديد يُنشأ مع GRANT + RLS معزولة حسب `institution_id`.
-- التصميم يُنقل إلى رموز دلالية في `src/styles.css` (بنفسجي أساسي، رمادي فاتح للخلفيات، ألوان دلالية للبطاقات) بدل ألوان صريحة.
+**المرحلة 0 — يمكن تنفيذها الآن (بلا حسابات):**
+- توليد `drizzle/schema.ts` كامل من القاعدة الحالية (introspect) ليصبح مصدر الحقيقة؛ دمج سجلي migrations في خط Drizzle واحد.
+- توسيع `src/server/db/adapter.ts` إلى واجهة Drizzle (`getDb()`) مع بقاء التنفيذ الحالي.
+- نقل استدعاءات `.from()` المباشرة من المتصفح (SchedulesManager, institution, teacher, student, AssessmentsPanel, Licenses, admin, TeacherAssessmentsPanel) إلى server functions.
+- كتابة اختبارات RBAC/tenant isolation على مستوى الخدمات (Vitest) تعمل على أي مزود.
+- استبدال `getUser()` المتفرق بـ hook واحد `useSession()`.
+ملفات: drizzle/*, src/server/**, src/lib/*.functions.ts, المكونات المذكورة، src/hooks.
 
-## اقتراح البدء
+**المرحلة 1 — تجهيز البنية (يتطلب منك إنشاء حسابات):** Neon, Cloudflare (Workers + R2), Resend + نطاق، GitHub. تضع المفاتيح في حقول الأسرار لدى كل مزود فقط، لا في المحادثة.
 
-المرحلتان 1 و2 هما الأهم عملياً (بريد حقيقي + اللوحة بالتصميم المطلوب). أبدأ بهما ما لم تحدد غير ذلك — وسأحتاج منك مفتاح Resend API لتفعيل الإرسال الفعلي.
+**المرحلة 2 — نقل طبقة البيانات إلى Drizzle:** إعادة كتابة كل `*.functions.ts` و`quiz.repository.ts` لاستخدام Drizzle عبر adapter، مع حارس خادمي إلزامي `requireTenant(ctx, institutionId)` و`requireRole()` في كل خدمة بدل RLS. تحويل الدوال التي تقرأ `auth.uid()` لتأخذ `_actor` صريحًا (مثل `transition_official_contract`). الإبقاء على المشغلات والقيود في Postgres كدفاع ثانٍ.
+
+**المرحلة 3 — Auth:** Better Auth بجداول `user/session/account` مرتبطة بـ `profiles.id` نفسه. كلمات المرور: تُصدّر تجزئات bcrypt من `auth.users.encrypted_password` بخادم آمن وتُستورد كما هي (لا تُكشف ولا تُفك)؛ إن تعذر، إرسال رابط إعادة تعيين لكل مستخدم. نقل `user_mfa`، تسجيل الدخول برقم الهاتف لمدير المنصة، إعادة التحقق قبل توقيع العقد. ملفات: auth.tsx, register.tsx, trial.tsx, _authenticated/route.tsx, start.ts, signup/platform/demo/vault/auth/official-contract functions, DashboardShell.
+
+**المرحلة 4 — Storage والمهام:** نسخ الدلوين إلى R2 بسكربت مع مقارنة عدد الملفات وSHA-256، روابط موقعة من الخادم؛ استبدال edge function بـ Cron Trigger؛ نسخ احتياطي يومي.
+
+**المرحلة 5 — نقل البيانات والتحقق:** `pg_dump --schema=public` → Neon؛ مقارنة `count(*)` و`md5(string_agg(...))` لكل جدول؛ تجربة كاملة على بيئة staging.
+
+**المرحلة 6 — Cutover/rollback:** تجميد الكتابة (وضع صيانة قصير)، مزامنة نهائية، تبديل DNS للنطاق، مراقبة 72 ساعة. Rollback: إعادة DNS إلى النسخة الحالية التي تبقى سليمة دون حذف؛ الإيقاف النهائي لـ Supabase SDK وحذف `src/integrations/supabase` والحزمة فقط بعد 30 يومًا مستقرة.
+
+## 5. اختبارات القبول لكل مرحلة
+- طالب لا يرى فوجًا آخر، أستاذ لا يصل لمادة أخرى، مدير مؤسسة لا يصل لمؤسسة أخرى ← 403.
+- تسجيل دخول كل دور بكلمة المرور القديمة نفسها + 2FA.
+- العقود: الهاش وPDF المحفوظ يطابقان قبل/بعد النقل.
+- أعداد الصفوف والملفات وchecksums متطابقة 100%.
+- TypeScript/build نظيف، لا استيراد لـ `@supabase` بعد المرحلة 6.
+
+## 6. ما هو متاح الآن مقابل ما يحتاجك
+- الآن: المرحلة 0 كاملة (تقلل الاعتماد دون أي تغيير مزود)، وأقترح البدء بها على دفعات صغيرة.
+- يحتاجك: إنشاء حسابات Neon/Cloudflare/Resend/GitHub، شراء نطاق، قرار مصير ميزة MCP (تعتمد على OAuth الحالي)، وتحمل التكلفة الشهرية المتوقعة (~25–35$ للإنتاج).
+
+## ترتيب التنفيذ المقترح
+0 → 1 → 2 (حسب الجداول: الاختبارات، الحضور، الأكاديمي، العقود، المنصة) → 3 → 4 → 5 → 6.
